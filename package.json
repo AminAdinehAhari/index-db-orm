@@ -1,0 +1,32 @@
+{
+  "name": "index-db-orm",
+  "version": "0.0.0",
+  "description": "a library for easy connection and work with client-side data base",
+  "main": "dist/index_bundle.js",
+  "scripts": {
+    "build": "webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AminAdinehAhari/index-db-orm.git"
+  },
+  "keywords": [
+    "index",
+    "db",
+    "orm"
+  ],
+  "author": "a.adine.a@gmail.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AminAdinehAhari/index-db-orm/issues"
+  },
+  "homepage": "https://github.com/AminAdinehAhari/index-db-orm#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "@babel/core": "^7.10.4",
+    "@babel/preset-env": "^7.11.0",
+    "babel-loader": "^8.1.0",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12"
+  }
+}
