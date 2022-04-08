@@ -4,8 +4,8 @@ module.exports = {
     entry: path.resolve(__dirname, "src/index.js"),
     output: {
         path: path.resolve(__dirname, "dist"),
-        filename: "index_bundle.js",
-        library: "$",
+        filename: "ormIndexDB.js",
+        library: "ormIndexDB",
         libraryTarget: "umd",
     },
     module: {
@@ -13,7 +13,16 @@ module.exports = {
             {
                 test: /\.(js)$/,
                 exclude: /node_modules/,
-                use: "babel-loader",
+                use: {
+                    loader: 'babel-loader',
+                    options: {
+                        presets: ['@babel/preset-env'],
+                        plugins: [
+                            "@babel/plugin-transform-async-to-generator",
+                            "@babel/plugin-transform-runtime"
+                        ]
+                    }
+                }
             },
         ],
     },

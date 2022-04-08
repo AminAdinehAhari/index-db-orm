@@ -1,4 +1,11 @@
-import capital from "./capital"
-import addDOMContent from "./addDOMContent"
+import orm from "./modules/builder/ormIndexDb";
+import dbBuilder from "./modules/builder/dbBuilder";
+import storeBuilder from "./modules/builder/storeBuilder";
+import indexBuilder from "./modules/builder/indexBuilder";
 
-export { capital, addDOMContent }
+export {
+    orm ,
+    dbBuilder,
+    storeBuilder,
+    indexBuilder
+}
