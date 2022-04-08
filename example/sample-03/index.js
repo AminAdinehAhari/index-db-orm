@@ -7,50 +7,65 @@ const dbPanel1 = new dbBuilder({name: 'database01', version: 1});
 const storeUser = new storeBuilder({
     name: "users",
     indexesSchemas: [
-        new indexBuilder({name: "email", keyPath: "email", option: {unique: true}}),
-        new indexBuilder({name: "phoneNumber", keyPath: "phoneNumber", option: {unique: false}}),
-        new indexBuilder({name: "userName", keyPath: "userName", option: {unique: false}})
+        // new indexBuilder({name: "email", keyPath: "email", option: {unique: true}}),
+        // new indexBuilder({name: "phoneNumber", keyPath: "phoneNumber", option: {unique: false}}),
+        // new indexBuilder({name: "userName", keyPath: "userName", option: {unique: false}})
     ]
 });
 
 
 const ormReady = async function () {
     const db = orm.db.database01;
-    const userStore = db.store?.users;
+    const userStore = db.store.users;
 
     let res1 = null;
     let res2 = null;
-    let e1 = null;
-    let e2 = null;
+    let res3 = null;
 
 
 
     try {
+        //---------------------------------
+        // insert -------------------------
+        //---------------------------------
         res1 = await userStore.insert({
             'email': `1email@gmail.com`,
             'phoneNumber': 100660,
             'userName': `userName`
         });
+        // console.log(res1);
+
+        //---------------------------------
+        // select -------------------------
+        //---------------------------------
+        res2 = await userStore.get(res1.result);
+        // console.log(res2);
+
+        //---------------------------------
+        // update -------------------------
+        //---------------------------------
+        res3 = await userStore.update({...res2.data, 'email': `tttttttt@gmail.com`});
+        console.log(res3);
+
+
+
+
     }catch (e) {
-        e1 = e;
+        console.log(e);
     }
 
 
-    try {
-        res2 = await userStore.insert({
-            'email': `1email@gmail.com`,
-            'phoneNumber': 100661,
-            'userName': `userName1`
-        });
-    }catch (e) {
-        e2 = e;
-    }
+    // try{
+    //     res3 = await userStore.get(1000);
+    //     console.log(res3);
+    // }catch (e) {
+    //     console.log(e);
+    // }
 
 
-    console.log(res1);
-    console.log(e1);
-    console.log(res2);
-    console.log(e2);
+
+
+
 
 
 };

@@ -1,10 +1,8 @@
 import StoreBuilderExtend from "../extend/storeBuilderExtend";
 import TransactionResponse from "../transactionResponse";
+import IndexBuilder from "./indexBuilder";
 import textMessage from "../textMessage";
-
-const READ_ONLY = 'readonly';
-const READ_WRITE = 'readwrite';
-
+import configs from "../configs";
 
 class StoreBuilder extends StoreBuilderExtend {
 
@@ -148,6 +146,44 @@ class StoreBuilder extends StoreBuilderExtend {
     }
 
     //------------------------------------
+    // pk index  -------------------------
+    //------------------------------------
+
+    /**
+     * create pk index
+     * @returns {string}
+     */
+    createPkIndexValue() {
+        let rand = Math.ceil(9 * Math.random());
+        return Date.now() + '0' + rand;
+    }
+
+
+    /**
+     * create default pk value
+     * @returns {StoreBuilder}
+     */
+    setPkObjectIndex() {
+        this.addIndexSchema(
+            new IndexBuilder({name: configs.KEY_PATH, keyPath: configs.KEY_PATH, option: {unique: true}}),
+        );
+        return this;
+    }
+
+
+    convertDataEntry(data) {
+        if (!!this.keyPath) {
+            return data;
+        } else {
+            let dt = data;
+            dt[configs.KEY_PATH] = this.createPkIndexValue();
+            return dt;
+        }
+
+    }
+
+
+    //------------------------------------
     // build  ----------------------------
     //------------------------------------
 
@@ -159,9 +195,10 @@ class StoreBuilder extends StoreBuilderExtend {
     async build(db) {
         let option = {};
         if (!!this.keyPath) {
-            option = {"keyPath": this.keyPath};
+            option = {"keyPath": this.keyPath ,  "autoIncrement": true};
         } else {
-            option = {"autoIncrement": true};
+            option = {"keyPath": option.keyPath , "autoIncrement": true};
+            this.setPkObjectIndex();
         }
 
         this.store = db.createObjectStore(this.name, option);
@@ -182,7 +219,6 @@ class StoreBuilder extends StoreBuilderExtend {
         for (let i in this.indexes) {
             await this.indexes[i].build(this.store);
         }
-
         return this;
     }
 
@@ -190,16 +226,16 @@ class StoreBuilder extends StoreBuilderExtend {
      * create read only transaction
      * @returns {IDBObjectStore}
      */
-    transactionReadOnly(){
-        return this.db?.transaction(this.name, READ_ONLY).objectStore(this.name);
+    transactionReadOnly() {
+        return this.db?.transaction(this.name, configs.READ_ONLY).objectStore(this.name);
     }
 
     /**
      * create read and write transaction
      * @returns {IDBObjectStore}
      */
-    transactionReadWrite(){
-        return this.db?.transaction(this.name, READ_WRITE).objectStore(this.name);
+    transactionReadWrite() {
+        return this.db?.transaction(this.name, configs.READ_WRITE).objectStore(this.name);
     }
 
 
@@ -208,57 +244,89 @@ class StoreBuilder extends StoreBuilderExtend {
      * @param {Object} data
      */
     insert(data) {
-        return new Promise((resolve,reject)=>{
+        return new Promise((resolve, reject) => {
             try {
-                let request = this.transactionReadWrite()?.add(data);
+                let transaction = this.transactionReadWrite();
+                let dt = this.convertDataEntry(data);
+                console.log(dt);
+                let request = transaction?.add(dt);
 
-                const checkResponse = (req)=>{
+                const checkResponse = (req) => {
 
-                    if (!!req.error){
-                        reject((new TransactionResponse())
-                            .setStatus(false,'error')
-                            .setError(req.error)
-                            .setTransaction(req.transaction)
-                            .getResponse());
-                    }else{
-
+                    if (!!req.error) {
+                        reject((new TransactionResponse()).getErrorResponse(req.error, req.transaction));
+                    } else {
                         resolve((new TransactionResponse())
-                            .setStatus(true,'success')
+                            .setStatus(true, 'success')
                             .setMessage(textMessage.SuccessInsertDoing)
                             .setResult(req.result)
-                            .setData({
-                                _id : req.result,
-                                ...data
-                            })
+                            .setTransaction(transaction)
+                            .setRequest(request)
+                            .setData(dt)
                             .getResponse());
                     }
-
-
                 };
 
+                request.onsuccess = function (event) {checkResponse(request)};
+                request.onerror = function (event) {checkResponse(request)};
 
-                request.onsuccess =  function(event) {
-                    checkResponse(request);
-                };
-
-                request.onerror  =  function(event) {
-                    checkResponse(request);
-                };
-
-
-
-
-            }catch (e) {
-                reject((new TransactionResponse())
-                    .setStatus("sysError")
-                    .setMessage(textMessage.ErrorSystem)
-                    .setError(e)
-                    .getResponse());
+            } catch (e) {
+                reject((new TransactionResponse()).getSysErrorResponse(e));
             }
         })
     }
 
 
+    /**
+     * get value by keyPath
+     * @param {string|number} _pk
+     * @returns {Promise<Object>}
+     */
+    get(_pk) {
+        // return new Promise((resolve, reject) => {
+        //     try {
+        //         let transaction = this.transactionReadWrite();
+        //         let request = transaction?.get(_pk);
+        //
+        //         const checkResponse = (req) => {
+        //
+        //             if (!!req.error) {
+        //                 reject((new TransactionResponse()).getErrorResponse(req.error, req.transaction));
+        //             } else {
+        //
+        //                 resolve((new TransactionResponse())
+        //                     .setStatus(true, 'success')
+        //                     .setMessage(textMessage.SuccessSelectDoing)
+        //                     .setResult(req.result)
+        //                     .setRequest(request)
+        //                     .setTransaction(transaction)
+        //                     .createSetObjData(_pk, req.result)
+        //                     .getResponse());
+        //             }
+        //
+        //         };
+        //
+        //         request.onsuccess = function (event) {
+        //             checkResponse(request);
+        //         };
+        //         request.onerror = function (event) {
+        //             checkResponse(request);
+        //         };
+        //
+        //     } catch (e) {
+        //         reject((new TransactionResponse()).getSysErrorResponse(e));
+        //     }
+        // })
+    }
+
+
+    /**
+     * update data in store
+     * @param {Object} data
+     */
+    update(data){
+
+    }
 
 
 }

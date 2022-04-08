@@ -4,8 +4,10 @@ const textMessage = {
     ErrorDbBuilderClass : "class must be use of DbBuilder class",
     ErrorDbBuilderNotName : "Name field does not exist in DbBuilder class",
     ErrorSystem : "system error",
+    ErrorValidPK : "pk not valid",
 
-    SuccessInsertDoing : "success insert doing"
+    SuccessInsertDoing : "success insert doing",
+    SuccessSelectDoing : "success selected",
 };
 
 

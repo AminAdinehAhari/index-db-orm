@@ -16,14 +16,19 @@ const storeUser = new storeBuilder({
 
 const ormReady = async function () {
     const db = orm.db.database01;
-    const userStore = db.store?.users;
+    const userStore = db.store.users;
 
     for (let i = 0; i < 1000; i++) {
-        await userStore.insert({
-            'email': `1email${i}@gmail.com`,
-            'phoneNumber': 100660 + i,
-            'userName': `userName${i}`
-        });
+        try{
+            await userStore.insert({
+                'email': `1email${i}@gmail.com`,
+                'phoneNumber': 100660 + i,
+                'userName': `userName${i}`
+            });
+        }catch (e) {
+
+        }
+
     }
 };
 

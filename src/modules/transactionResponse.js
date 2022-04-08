@@ -1,3 +1,5 @@
+import textMessage from "./textMessage";
+import configs from "./configs";
 
 class TransactionResponse {
 
@@ -8,7 +10,8 @@ class TransactionResponse {
         message : "",
         data: null,
         error:null,
-        transaction : null
+        transaction : null,
+        request: null
     };
 
     constructor() {
@@ -36,6 +39,15 @@ class TransactionResponse {
         return this;
     }
 
+    /**
+     * set request
+     * @param {Object} request
+     * @returns {TransactionResponse}
+     */
+    setRequest(request){
+        this.response.request = request;
+        return this;
+    }
 
     /**
      * set result
@@ -47,7 +59,6 @@ class TransactionResponse {
         return this;
     }
 
-
     /**
      * set transaction
      * @param {Object} transaction
@@ -57,10 +68,6 @@ class TransactionResponse {
         this.response.transaction = transaction;
         return this;
     }
-
-
-
-
 
     /**
      * set data
@@ -72,8 +79,6 @@ class TransactionResponse {
         return this;
     }
 
-
-
     /**
      * set error
      * @param {Object} e
@@ -84,13 +89,55 @@ class TransactionResponse {
         return this;
     }
 
-
     /**
      * get response
      * @returns {{result: null, data: null, statusTile: boolean, message: string, error: null, transaction: null, status: boolean}}
      */
     getResponse(){
         return this.response
+    }
+
+    /**
+     * get System Error Response
+     * @param {Object} e
+     * @returns {{result: null, data: null, statusTile: boolean, message: string, error: null, transaction: null, status: boolean}}
+     */
+    getSysErrorResponse(e){
+        return this.setStatus(false,"sysError")
+            .setMessage(textMessage.ErrorSystem)
+            .setError(e)
+            .getResponse()
+    }
+
+    /**
+     * get Error Response
+     * @param {Object} e
+     * @param {Object} transaction
+     * @returns {{result: null, data: null, statusTile: boolean, message: string, error: null, transaction: null, status: boolean}}
+     */
+    getErrorResponse(e,transaction){
+        return this.setStatus(false, 'error')
+            .setError(e)
+            .setTransaction(transaction)
+            .getResponse()
+    }
+
+    /**
+     * create and set Object Data
+     * @param {string|number} _pk
+     * @param {Object} data
+     * @returns {TransactionResponse}
+     */
+    createSetObjData(_pk,data){
+        if (!!data && !!_pk){
+            let dt = data;
+            dt[configs.KEY_PATH] = _pk;
+
+            return this.setData(dt);
+
+        }else{
+            return this;
+        }
     }
 
 
