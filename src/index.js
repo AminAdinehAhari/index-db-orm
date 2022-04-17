@@ -1,11 +1,5 @@
-import orm from "./modules/builder/ormIndexDb";
-import dbBuilder from "./modules/builder/dbBuilder";
-import storeBuilder from "./modules/builder/storeBuilder";
-import indexBuilder from "./modules/builder/indexBuilder";
+import orm from "./modules/ormIndexDb";
 
 export {
-    orm ,
-    dbBuilder,
-    storeBuilder,
-    indexBuilder
+    orm
 }

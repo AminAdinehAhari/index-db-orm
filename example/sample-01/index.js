@@ -27,6 +27,7 @@ window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.ms
 
 
 const dbName = "the_name2";
+const dbVersion = 2;
 
 var request = indexedDB.open(dbName, 2);
 
@@ -45,13 +46,10 @@ request.onupgradeneeded = event => {
     var db = event.target.result;
 
     var objectStore = db.createObjectStore("customers", { autoIncrement: true });
-
     objectStore.createIndex("name1", "name", { unique: false });
-
     objectStore.createIndex("email", "email", { unique: true });
 
     console.log(db);
-
     objectStore.transaction.oncomplete = event => {
         // Store values in the newly created objectStore.
         var customerObjectStore = db.transaction("customers", "readwrite").objectStore("customers");
@@ -62,6 +60,26 @@ request.onupgradeneeded = event => {
 
     objectStore.transaction.onerror = event => {
         // Don't forget to handle errors!
+    };
+
+
+    //--------------------------------------------------------
+    //--------------------------------------------------------
+    //--------------------------------------------------------
+    var objectStore2 = db.createObjectStore("customers2", { autoIncrement: true });
+    objectStore2.createIndex("name1", "name", { unique: false });
+    objectStore2.createIndex("email", "email", { unique: true });
+    objectStore2.transaction.oncomplete = event => {
+        // Store values in the newly created objectStore.
+        var customerObjectStore = db.transaction("customers2", "readwrite").objectStore("customers");
+        customerData.forEach(function(customer) {
+            customerObjectStore.add(customer);
+        });
+    };
+
+    objectStore2.transaction.onerror = event => {
+        // Don't forget to handle errors!
+        console.log('error');
     };
 };
 
