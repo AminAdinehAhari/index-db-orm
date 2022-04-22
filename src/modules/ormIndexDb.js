@@ -7,10 +7,8 @@ class OrmIndexDb {
     IDB = null;
     IDBTransaction = null;
     IDBKeyRange = null;
-
-    isSupport = false;
-
-    schema = {};
+    __isSupport = false;
+    __schema = {};
 
 
     constructor() {
@@ -29,16 +27,16 @@ class OrmIndexDb {
         this.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange;
 
         if (!!!this.IDB) {
-            this.isSupport = false;
+            this.__isSupport = false;
             console.error(textMessage.ErrorBrowserSupport);
             throw textMessage.ErrorBrowserSupport;
         } else {
-            this.isSupport = true;
+            this.__isSupport = true;
         }
     }
 
     checkSupport() {
-        if (!this.isSupport) {
+        if (!this.__isSupport) {
             throw textMessage.ErrorBrowserSupport;
         }
     }
@@ -60,34 +58,26 @@ class OrmIndexDb {
     }
 
     async getDataBase(name) {
-        return new Promise(async (resolve, reject) => {
-            try {
-                let all = await this.getAllDatabases();
-                resolve(all.find(it => it.name === name));
-            } catch (e) {
-                reject(e);
-            }
-        })
+        try {
+            let all = await this.getAllDatabases();
+            return all.find(it => it.name === name);
+        } catch (e) {
+            return e
+        }
     };
 
-
     async getDataBaseVersion(name) {
-        return new Promise(async (resolve, reject) => {
-            try {
-                let dataBase = await this.getDataBase(name);
-
-                if (!!dataBase) {
-                    resolve(dataBase.version);
-                } else {
-                    resolve(1);
-                }
-
-            } catch (e) {
-                resolve(1);
+        try {
+            let dataBase = await this.getDataBase(name);
+            if (!!dataBase) {
+                return dataBase.version;
+            } else {
+                return 1;
             }
-        })
+        } catch (e) {
+            return 1;
+        }
     }
-
 
     async removeAllDataBase() {
         let DB = await this.getAllDatabases();
@@ -102,7 +92,6 @@ class OrmIndexDb {
             await this.IDB.deleteDatabase(dataBaseName);
             return this;
         } catch (e) {
-            console.error(e);
             return this;
         }
     }
@@ -117,7 +106,6 @@ class OrmIndexDb {
     // Public -----------------------------------
 
     addDB(dbSchema) {
-
         const stores = {};
 
         for (let i = 0; i < dbSchema.stores.length; i++) {
@@ -127,7 +115,7 @@ class OrmIndexDb {
             }
         }
 
-        this.schema[dbSchema.name] = {
+        this.__schema[dbSchema.name] = {
             version: 1,
             currentVersion: 1,
             db: null,
@@ -140,16 +128,16 @@ class OrmIndexDb {
     }
 
     onRebuildDB(dbName, event) {
-        this.schema[dbName].onRebuild = event;
+        this.__schema[dbName].onRebuild = event;
         return this;
     }
 
     // Private ----------------------------------
 
     _openDB(name) {
-        const version = Math.max(this.schema[name].version, this.schema[name].currentVersion);
+        const version = Math.max(this.__schema[name].version, this.__schema[name].currentVersion);
 
-        return new Promise(async (resolve, reject) => {
+        return new Promise((resolve, reject) => {
             this.checkSupport();
             try {
                 const request = this.IDB.open(name, version);
@@ -160,15 +148,15 @@ class OrmIndexDb {
 
                 request.onsuccess = event => {
                     const db = event.target.result;
-                    this.schema[name].db = event.target.result;
-                    this.schema[name].version = parseInt(db.version);
+                    this.__schema[name].db = event.target.result;
+                    this.__schema[name].version = parseInt(db.version);
                     resolve({type: 'success', db: db});
                 };
 
-                request.onupgradeneeded = async (event) => {
+                request.onupgradeneeded = (event) => {
                     const db = event.target.result;
-                    this.schema[name].db = event.target.result;
-                    this.schema[name].version = parseInt(db.version);
+                    this.__schema[name].db = event.target.result;
+                    this.__schema[name].version = parseInt(db.version);
                     resolve({type: 'upgrade', db: db});
                 }
 
@@ -180,10 +168,10 @@ class OrmIndexDb {
     }
 
     _closeDB(name) {
-        return new Promise(async (resolve, reject) => {
+        return new Promise((resolve, reject) => {
             try {
-                this.schema[name].db?.close();
-                this.schema[name].db = null;
+                this.__schema[name].db?.close();
+                this.__schema[name].db = null;
                 resolve()
             } catch (e) {
                 reject(e)
@@ -193,17 +181,45 @@ class OrmIndexDb {
     }
 
     _rebuildDBEvent(name) {
-        if (this.schema[name].isBuild) {
-            const ev = this.schema[name].onRebuild;
+        if (this.__schema[name].isBuild) {
+            const ev = this.__schema[name].onRebuild;
             if (!!ev) {
                 ev();
-                this.schema[name].isBuild = false;
+                this.__schema[name].isBuild = false;
             }
         }
     }
 
     // Store Functions --------------------------
     // Public -----------------------------------
+
+    async clearStore(dbName, storeName) {
+        return new Promise(async (resolve, reject) => {
+            try {
+
+                if (!this._checkActiveDB(dbName)) {
+                    await this._openDB(dbName);
+                }
+
+                let transaction = this._transactionReadWrite(dbName, storeName).objectStore(storeName);
+                let request = transaction?.clear();
+
+                request.onsuccess = event => {
+                    resolve(true)
+                };
+
+                request.onerror = event => {
+                    let req = event.target;
+                    reject(!!req.error ? req.error : new Error(textMessage.ErrorSystem));
+                };
+
+
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
 
     // Private ----------------------------------
 
@@ -217,51 +233,49 @@ class OrmIndexDb {
                 keyPathAuto: !!!storeSchema.keyPath,
                 indexes: !!storeSchema.indexes && Array.isArray(storeSchema.indexes) ?
                     this._createIndexesArray(storeSchema.indexes, keyPath) :
-                    this._createIndexesArray([], keyPath)
+                    this._createIndexesArray([], keyPath),
             }
         } else {
             return null;
         }
     }
 
-    _createDbStores(dbName) {
-        return new Promise(async (resolve, reject) => {
-            try {
+    async _createDbStores(dbName) {
+        try {
 
-                let stores = this.schema[dbName].stores;
-                let start = true;
-                for (let i in stores) {
+            let stores = this.__schema[dbName].stores;
+            let start = true;
+            for (let i in stores) {
 
-                    if (!start) {
-                        this.schema[dbName].version = this.schema[dbName].version + 1;
-                    }
-                    start = false;
+                if (!start) {
+                    this.__schema[dbName].version = this.__schema[dbName].version + 1;
+                }
+                start = false;
 
-                    if (!!!this.schema[dbName].db) {
-                        await this._openDB(dbName);
-                    }
-
-                    await this._createDbStore(dbName, i);
-                    await this._closeDB(dbName);
-
+                if (!!!this.__schema[dbName].db) {
+                    await this._openDB(dbName);
                 }
 
-                this.schema[dbName].isBuild = true;
+                await this._createDbStore(dbName, i);
+                await this._closeDB(dbName);
 
-                resolve(this)
-            } catch (e) {
-                console.error(e);
-                reject(e)
             }
-        });
+
+            this.__schema[dbName].isBuild = true;
+
+            return this;
+        } catch (e) {
+            console.error(e);
+            return e
+        }
     }
 
     _createDbStore(dbName, storeName) {
-        return new Promise(async (resolve, reject) => {
+        return new Promise((resolve, reject) => {
             try {
 
-                let store = this.schema[dbName].stores[storeName];
-                let db = this.schema[dbName].db;
+                let store = this.__schema[dbName].stores[storeName];
+                let db = this.__schema[dbName].db;
 
                 if (!!db) {
 
@@ -383,7 +397,7 @@ class OrmIndexDb {
                     await this._openDB(dbName);
                 }
 
-                let storeObj = this.schema[dbName].stores[storeName];
+                let storeObj = this.__schema[dbName].stores[storeName];
                 let storeKeyPath = storeObj.keyPath;
                 const _pk = data[storeKeyPath];
                 const newData = this._updateConvertDataEntry(dbName, storeName, data);
@@ -462,14 +476,14 @@ class OrmIndexDb {
         return new Promise(async (resolve, reject) => {
             try {
 
-                const keyRangeValue = IDBKeyRange.only(value);
+                const keyRangeValue = this.IDBKeyRange.only(value);
                 let result = null;
 
                 if (!this._checkActiveDB(dbName)) {
                     await this._openDB(dbName);
                 }
 
-                let storeObj = this.schema[dbName].stores[storeName];
+                let storeObj = this.__schema[dbName].stores[storeName];
                 let storeKeyPath = storeObj.keyPath;
 
                 let transaction = this._transactionReadOnly(dbName, storeName).objectStore(storeName);
@@ -499,7 +513,6 @@ class OrmIndexDb {
     }
 
     async all(dbName, storeName) {
-
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -535,38 +548,36 @@ class OrmIndexDb {
                     await this._openDB(dbName);
                 }
 
-                let storeObj = this.schema[dbName].stores[storeName];
-                let storeKeyPath = storeObj.keyPath;
-
                 let keyRangeValue = null;
                 let result = [];
 
+                const cursorConditionOperator = ['like', '%like', 'like%', '%like%','match'];
+
                 switch (conditionOperator) {
                     case "=":
-                        keyRangeValue = IDBKeyRange.only(conditionValues);
+                        keyRangeValue = this.IDBKeyRange?.only(conditionValues);
                         break;
                     case ">":
-                        keyRangeValue = IDBKeyRange.lowerBound(conditionValues,false);
+                        keyRangeValue = this.IDBKeyRange?.lowerBound(conditionValues, false);
                         break;
                     case ">=":
-                        keyRangeValue = IDBKeyRange.lowerBound(conditionValues, true);
+                        keyRangeValue = this.IDBKeyRange?.lowerBound(conditionValues, true);
                         break;
                     case "<":
-                        keyRangeValue = IDBKeyRange.upperBound(conditionValues,false);
+                        keyRangeValue = this.IDBKeyRange?.upperBound(conditionValues, false);
                         break;
                     case "<=":
-                        keyRangeValue = IDBKeyRange.upperBound(conditionValues,true);
+                        keyRangeValue = this.IDBKeyRange?.upperBound(conditionValues, true);
                         break;
                     case "between":
-                        keyRangeValue = IDBKeyRange.bound(...conditionValues, false, false);
+                        keyRangeValue = this.IDBKeyRange?.bound(...conditionValues, false, false);
                         break;
                     case "betweenInclude":
-                        keyRangeValue = IDBKeyRange.bound(...conditionValues, true, true);
+                        keyRangeValue = this.IDBKeyRange?.bound(...conditionValues, true, true);
                         break;
                     default :
                         keyRangeValue = null;
                         break;
-
                 }
 
                 if (!!keyRangeValue) {
@@ -591,6 +602,66 @@ class OrmIndexDb {
                     };
 
 
+                } else if (cursorConditionOperator.includes(conditionOperator)) {
+
+                    const conditionStringValue = !!conditionValues && typeof conditionValues !== 'object' ? conditionValues.toString() : null;
+
+                    if (!!conditionStringValue) {
+
+                        let transaction = this._transactionReadOnly(dbName, storeName).objectStore(storeName);
+                        const getCursorRequest = transaction.openCursor();
+
+                        getCursorRequest.onsuccess = function (event) {
+                            const cursor = event.target.result;
+                            if (!!cursor && !!cursor.value) {
+
+                                let searchValue = !!cursor.value[conditionIndex] ?
+                                    cursor.value[conditionIndex] : "";
+
+
+                                if (conditionOperator === 'like' || conditionOperator === '%like%') {
+                                    let re = new RegExp(`^(.*){0,}${conditionStringValue}(.*){0,}$`, 'i');
+
+                                    if (!!searchValue && searchValue.match(re)) {
+                                        result.push(cursor.value);
+                                    }
+
+                                } else if (conditionOperator === '%like') {
+                                    let re = new RegExp(`^(.*){0,}${conditionStringValue}$`, 'i');
+
+                                    if (!!searchValue && searchValue.match(re)) {
+                                        result.push(cursor.value);
+                                    }
+                                } else if (conditionOperator === 'like%') {
+                                    let re = new RegExp(`^${conditionStringValue}(.*){0,}$`, 'i');
+
+                                    if (!!searchValue && searchValue.match(re)) {
+                                        result.push(cursor.value);
+                                    }
+                                } else if (conditionOperator === 'match') {
+                                    let re = new RegExp(conditionStringValue, 'i');
+
+                                    if (!!searchValue && searchValue.match(re)) {
+                                        result.push(cursor.value);
+                                    }
+                                }
+
+                                cursor.continue();
+                            } else {
+                                resolve(result)
+                            }
+                        };
+
+
+                        getCursorRequest.onerror = function (event) {
+                            console.error(event.error);
+                            resolve([]);
+                        };
+
+                    } else {
+                        resolve([]);
+                    }
+
                 } else {
                     resolve([]);
                 }
@@ -599,6 +670,60 @@ class OrmIndexDb {
                 resolve([]);
             }
         })
+    }
+
+    async multiWhere(dbName, storeName, conditions = [], operator = 'and') {
+        try {
+            let conditionList = Array.isArray(conditions) ? conditions : [];
+            let result = [];
+            let cacheKeys = [];
+            let cacheResult;
+            let storeObject = this.__schema[dbName].stores[storeName];
+            let keyPath = storeObject?.keyPath;
+
+            for (let i = 0; i < conditionList.length; i++) {
+                if (!!conditionList[i].index && !!conditionList[i].operator && !!conditionList[i].value) {
+                    try {
+                        cacheResult = await this.where(dbName, storeName, conditionList[i].index, conditionList[i].operator, conditionList[i].value);
+                    } catch (e) {
+                        cacheResult = [];
+                    }
+
+                    if (i === 0) {
+                        result = cacheResult;
+                    } else {
+                        if (operator === 'or') {
+                            result = [
+                                ...result,
+                                ...cacheResult
+                            ];
+                        } else {
+                            cacheKeys = cacheResult.map(it => it[keyPath]);
+                            result = result.filter(it => {
+                                return cacheKeys.includes(it[keyPath])
+                            });
+
+                            if (result.length === 0) {
+                                break;
+                            }
+                        }
+
+                    }
+                }
+            }
+
+            if (operator === 'or') {
+                return [...new Map(result.map(item =>
+                    [item[keyPath], item])).values()];
+            } else {
+                return result;
+            }
+
+
+        } catch (e) {
+            console.log(e);
+            return [];
+        }
     }
 
     // private ---------------------------------
@@ -610,7 +735,7 @@ class OrmIndexDb {
 
     _insertConvertDataEntry(dbName, storeName, data) {
 
-        const store = this.schema[dbName].stores[storeName];
+        const store = this.__schema[dbName].stores[storeName];
         const keyPath = store.keyPath;
 
         let newData = data;
@@ -628,28 +753,28 @@ class OrmIndexDb {
 
     _updateConvertDataEntry(dbName, storeName, data) {
 
-        const store = this.schema[dbName].stores[storeName];
+        const store = this.__schema[dbName].stores[storeName];
         const keyPath = store.keyPath;
 
         return data;
     }
 
     _transactionReadOnly(dbName, storeName) {
-        const dbObj = this.schema[dbName];
+        const dbObj = this.__schema[dbName];
         const db = dbObj.db;
 
         return db?.transaction(storeName, configs.READ_ONLY);
     }
 
     _transactionReadWrite(dbName, storeName) {
-        const dbObj = this.schema[dbName];
+        const dbObj = this.__schema[dbName];
         const db = dbObj.db;
 
         return db.transaction(storeName, configs.READ_WRITE);
     }
 
     _checkActiveDB(dbName) {
-        let dbObj = this.schema[dbName];
+        let dbObj = this.__schema[dbName];
         let db = dbObj.db;
         return !!db
     }
@@ -665,7 +790,7 @@ class OrmIndexDb {
 
         return new Promise(async (resolve, reject) => {
             try {
-                for (let i in this.schema) {
+                for (let i in this.__schema) {
                     try {
                         await this._setCurrentVersionOnSchema(i);
 
@@ -676,15 +801,15 @@ class OrmIndexDb {
 
                         let status = await this._compareStoresToVersionChange(i);
 
-
                         if (!status) {
                             try {
                                 await this._rebuildDB(i);
                             } catch (e) {
-                                console.log("e2----", e);
                                 console.error(e)
                             }
                         }
+
+                        this._addDataBaseToClass(i)
 
                     } catch (e) {
                     }
@@ -693,7 +818,7 @@ class OrmIndexDb {
                 resolve(this);
 
                 setTimeout(() => {
-                    for (let i in this.schema) {
+                    for (let i in this.__schema) {
                         this._rebuildDBEvent(i);
                     }
                 }, 20);
@@ -710,11 +835,11 @@ class OrmIndexDb {
         return new Promise(async (resolve, reject) => {
             try {
 
-                if (!!!this.schema[dbName].db) {
+                if (!!!this.__schema[dbName].db) {
                     await this._openDB(dbName)
                 }
 
-                let dbObject = this.schema[dbName];
+                let dbObject = this.__schema[dbName];
                 let stores = dbObject.stores;
 
                 const orgStores = [...dbObject.db.objectStoreNames];
@@ -757,9 +882,7 @@ class OrmIndexDb {
     _setCurrentVersionOnSchema(dbName) {
         return new Promise(async (resolve, reject) => {
             try {
-                let version = await this.getDataBaseVersion(dbName);
-
-                this.schema[dbName].currentVersion = version;
+                this.__schema[dbName].currentVersion = await this.getDataBaseVersion(dbName);
 
                 resolve(1);
             } catch (e) {
@@ -772,6 +895,50 @@ class OrmIndexDb {
     //-------------------------------------------
     //-------------------------------------------
 
+    _addDataBaseToClass(db) {
+        let dbObj = {};
+
+        for (let j in this.__schema[db].stores) {
+            dbObj[j] = {
+                ...this.__schema[db].stores[j],
+                ...this._addDataBaseHandler(db, j)
+            }
+        }
+
+        this[db] = dbObj;
+    }
+
+    _addDataBaseHandler(dbName, storeName) {
+
+        let ths = this;
+
+        return {
+            insert: function (data) {
+                return ths.insert(dbName, storeName, data)
+            },
+            update: function (data) {
+                return ths.update(dbName, storeName, data)
+            },
+            delete: function (_pk) {
+                return ths.delete(dbName, storeName, _pk)
+            },
+            find: function (value, searchPk = null) {
+                return ths.find(dbName, storeName, value, searchPk)
+            },
+            all: function () {
+                return ths.all(dbName, storeName)
+            },
+            where: function (conditionIndex, conditionOperator, conditionValues) {
+                return ths.where(dbName, storeName, conditionIndex, conditionOperator, conditionValues)
+            },
+            multiWhere: function(conditions){
+                return ths.multiWhere(dbName, storeName, conditions)
+            },
+            clear: function () {
+                return ths.clearStore(dbName, storeName)
+            },
+        }
+    }
 
 }
 
