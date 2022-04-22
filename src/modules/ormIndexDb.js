@@ -11,6 +11,9 @@ class OrmIndexDb {
     __schema = {};
 
 
+    /**
+     * constructor : check Browser Support
+     */
     constructor() {
         try {
             this.checkBrowserSupport();
@@ -21,6 +24,9 @@ class OrmIndexDb {
     // Support Functions ------------------------
     //-------------------------------------------
 
+    /**
+     * checkBrowserSupport
+     */
     checkBrowserSupport() {
         this.IDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
         this.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction || {READ_WRITE: "readwrite"}; // This line should only be needed if it is needed to support the object's constants for older browsers
@@ -35,6 +41,9 @@ class OrmIndexDb {
         }
     }
 
+    /**
+     * checkSupport
+     */
     checkSupport() {
         if (!this.__isSupport) {
             throw textMessage.ErrorBrowserSupport;
@@ -49,6 +58,10 @@ class OrmIndexDb {
     // DB Functional ----------------------------
     // Public -----------------------------------
 
+    /**
+     * getAllDatabases
+     * @returns {Promise<array>}
+     */
     async getAllDatabases() {
         try {
             return await this.IDB.databases();
@@ -57,6 +70,11 @@ class OrmIndexDb {
         }
     }
 
+    /**
+     * getDataBase
+     * @param {String} name
+     * @returns {Promise<Object>}
+     */
     async getDataBase(name) {
         try {
             let all = await this.getAllDatabases();
@@ -66,6 +84,11 @@ class OrmIndexDb {
         }
     };
 
+    /**
+     * getDataBaseVersion
+     * @param {string} name
+     * @returns {Promise<number|*>}
+     */
     async getDataBaseVersion(name) {
         try {
             let dataBase = await this.getDataBase(name);
@@ -79,6 +102,10 @@ class OrmIndexDb {
         }
     }
 
+    /**
+     * removeAllDataBase
+     * @returns {Promise<OrmIndexDb>}
+     */
     async removeAllDataBase() {
         let DB = await this.getAllDatabases();
         for (let i = 0; i < DB.length; i++) {
@@ -87,6 +114,11 @@ class OrmIndexDb {
         return this;
     }
 
+    /**
+     * removeDataBase
+     * @param {string} dataBaseName
+     * @returns {Promise<OrmIndexDb>}
+     */
     async removeDataBase(dataBaseName) {
         try {
             await this.IDB.deleteDatabase(dataBaseName);
@@ -105,6 +137,32 @@ class OrmIndexDb {
     // DB Object Functions ----------------------
     // Public -----------------------------------
 
+    /**
+     *
+     * @param {Object} dbSchema
+     * @returns {OrmIndexDb}
+     * exp dbSchema :
+     * {
+     *       name: String,
+     *       stores: [
+     *           ...,
+     *           {
+     *               name: string,
+     *               indexes: [
+     *                  ....
+     *                  {
+     *                      name : string,
+     *                      keyPath : string ,
+     *                      option : { unique : boolean}
+     *                  }
+     *                  ....
+     *               ]
+     *           },
+     *           ....
+     *       ]
+     *   }
+     *
+     */
     addDB(dbSchema) {
         const stores = {};
 
@@ -127,6 +185,12 @@ class OrmIndexDb {
         return this;
     }
 
+    /**
+     *
+     * @param {string} dbName
+     * @param {function} event
+     * @returns {OrmIndexDb}
+     */
     onRebuildDB(dbName, event) {
         this.__schema[dbName].onRebuild = event;
         return this;
@@ -134,6 +198,12 @@ class OrmIndexDb {
 
     // Private ----------------------------------
 
+    /**
+     * _openDB
+     * @param {string} name
+     * @returns {Promise<object>}
+     * @private
+     */
     _openDB(name) {
         const version = Math.max(this.__schema[name].version, this.__schema[name].currentVersion);
 
@@ -167,6 +237,13 @@ class OrmIndexDb {
         });
     }
 
+
+    /**
+     * _closeDB
+     * @param {string} name
+     * @returns {Promise<*>}
+     * @private
+     */
     _closeDB(name) {
         return new Promise((resolve, reject) => {
             try {
@@ -176,10 +253,14 @@ class OrmIndexDb {
             } catch (e) {
                 reject(e)
             }
-
         });
     }
 
+    /**
+     * _rebuildDBEvent
+     * @param {string} name
+     * @private
+     */
     _rebuildDBEvent(name) {
         if (this.__schema[name].isBuild) {
             const ev = this.__schema[name].onRebuild;
@@ -193,6 +274,12 @@ class OrmIndexDb {
     // Store Functions --------------------------
     // Public -----------------------------------
 
+    /**
+     * clearStore
+     * @param {string} dbName
+     * @param {string} storeName
+     * @returns {Promise<boolean|*>}
+     */
     async clearStore(dbName, storeName) {
         return new Promise(async (resolve, reject) => {
             try {
@@ -223,6 +310,12 @@ class OrmIndexDb {
 
     // Private ----------------------------------
 
+    /**
+     * _createStoreObjectSchema
+     * @param {string} storeSchema
+     * @returns {null|{indexes: (*), keyPath: string, name: *, keyPathAuto: boolean}}
+     * @private
+     */
     _createStoreObjectSchema(storeSchema) {
         if (!!storeSchema.name) {
             const keyPath = !!storeSchema.keyPath ? storeSchema.keyPath : configs.KEY_PATH;
@@ -240,6 +333,12 @@ class OrmIndexDb {
         }
     }
 
+    /**
+     * _createDbStores
+     * @param {string} dbName
+     * @returns {Promise<*|OrmIndexDb>}
+     * @private
+     */
     async _createDbStores(dbName) {
         try {
 
@@ -270,6 +369,13 @@ class OrmIndexDb {
         }
     }
 
+    /**
+     * _createDbStore
+     * @param {string} dbName
+     * @param {string} storeName
+     * @returns {Promise<boolean|error>}
+     * @private
+     */
     _createDbStore(dbName, storeName) {
         return new Promise((resolve, reject) => {
             try {
@@ -300,7 +406,6 @@ class OrmIndexDb {
         });
     }
 
-
     //-------------------------------------------
     //-------------------------------------------
     //-------------------------------------------
@@ -310,6 +415,13 @@ class OrmIndexDb {
 
     // Private ----------------------------------
 
+    /**
+     * _createIndexesArray
+     * @param {array<Object>} indexesArr
+     * @param {string} keyPath
+     * @returns {array<object>}
+     * @private
+     */
     _createIndexesArray(indexesArr, keyPath) {
         let indexes = indexesArr.map(it => {
             return this._createIndexObject(it.name, it.keyPath, it.option)
@@ -321,6 +433,14 @@ class OrmIndexDb {
         ].filter(it => !!it);
     }
 
+    /**
+     *_createIndexObject
+     * @param {string} name
+     * @param {string} keyPath
+     * @param {Object} option
+     * @returns {{keyPath: *, name: *, option: ({unique: boolean})}|null}
+     * @private
+     */
     _createIndexObject(name, keyPath, option = {unique: false}) {
         if (!!name && !!keyPath) {
             return {
@@ -333,12 +453,24 @@ class OrmIndexDb {
         }
     }
 
+    /**
+     * _buildStoreIndexes
+     * @param {string} storeObject
+     * @param {array} arrayIndexObj
+     * @private
+     */
     _buildStoreIndexes(storeObject, arrayIndexObj) {
         for (let i = 0; i < arrayIndexObj.length; i++) {
             this._buildStoreIndex(storeObject, arrayIndexObj[i]);
         }
     }
 
+    /**
+     * _buildStoreIndex
+     * @param {Object} storeObject
+     * @param {Object} indexObj
+     * @private
+     */
     _buildStoreIndex(storeObject, indexObj) {
         storeObject.createIndex(indexObj.name, indexObj.keyPath, indexObj.option);
     }
@@ -350,8 +482,14 @@ class OrmIndexDb {
     // CRUD Functions ---------------------------
     // Public -----------------------------------
 
+    /**
+     * insert
+     * @param {string} dbName
+     * @param {string} storeName
+     * @param {Object} data
+     * @returns {Promise<Error|Object>}
+     */
     async insert(dbName, storeName, data) {
-
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -380,14 +518,19 @@ class OrmIndexDb {
                     reject(!!req.error ? req.error : new Error(textMessage.ErrorSystem));
                 };
 
-
             } catch (e) {
                 reject(e);
             }
         })
-
     }
 
+    /**
+     * update
+     * @param {string} dbName
+     * @param {string} storeName
+     * @param {object} data
+     * @returns {Promise<Error|Object>}
+     */
     async update(dbName, storeName, data) {
 
         return new Promise(async (resolve, reject) => {
@@ -442,6 +585,13 @@ class OrmIndexDb {
 
     }
 
+    /**
+     * delete
+     * @param {string} dbName
+     * @param {string} storeName
+     * @param {string|number} _pk
+     * @returns {Promise<Error|boolean>}
+     */
     async delete(dbName, storeName, _pk) {
 
         return new Promise(async (resolve, reject) => {
@@ -472,6 +622,14 @@ class OrmIndexDb {
 
     }
 
+    /**
+     * find
+     * @param {string} dbName
+     * @param {string} storeName
+     * @param {object} value
+     * @param {string} searchPk
+     * @returns {Promise<object>}
+     */
     async find(dbName, storeName, value, searchPk = null) {
         return new Promise(async (resolve, reject) => {
             try {
@@ -512,6 +670,12 @@ class OrmIndexDb {
         })
     }
 
+    /**
+     * all
+     * @param {string} dbName
+     * @param {string} storeName
+     * @returns {Promise<array>}
+     */
     async all(dbName, storeName) {
         return new Promise(async (resolve, reject) => {
             try {
@@ -540,6 +704,15 @@ class OrmIndexDb {
         })
     }
 
+    /**
+     * where
+     * @param {string} dbName
+     * @param {string} storeName
+     * @param {string} conditionIndex
+     * @param {string} conditionOperator includes : = , > , >= , <= , < ,  between , betweenInclude , like , %like , like% , %like% , match
+     * @param {string|array} conditionValues
+     * @returns {Promise<array>}
+     */
     async where(dbName, storeName, conditionIndex, conditionOperator, conditionValues) {
         return new Promise(async (resolve, reject) => {
             try {
@@ -672,6 +845,14 @@ class OrmIndexDb {
         })
     }
 
+    /**
+     * multiWhere
+     * @param {string} dbName
+     * @param {string} storeName
+     * @param {array} conditions
+     * @param {string} operator
+     * @returns {Promise<array>}
+     */
     async multiWhere(dbName, storeName, conditions = [], operator = 'and') {
         try {
             let conditionList = Array.isArray(conditions) ? conditions : [];
@@ -728,11 +909,24 @@ class OrmIndexDb {
 
     // private ---------------------------------
 
+    /**
+     * _generatePkIndexValue
+     * @returns {string}
+     * @private
+     */
     _generatePkIndexValue() {
         let rand = Math.ceil(9 * Math.random());
         return Date.now() + '0' + rand;
     }
 
+    /**
+     * _insertConvertDataEntry
+     * @param {string} dbName
+     * @param {string} storeName
+     * @param {object} data
+     * @returns {object}
+     * @private
+     */
     _insertConvertDataEntry(dbName, storeName, data) {
 
         const store = this.__schema[dbName].stores[storeName];
@@ -751,6 +945,14 @@ class OrmIndexDb {
         return newData;
     }
 
+    /**
+     * _updateConvertDataEntry
+     * @param {string} dbName
+     * @param {string} storeName
+     * @param {object} data
+     * @returns {object}
+     * @private
+     */
     _updateConvertDataEntry(dbName, storeName, data) {
 
         const store = this.__schema[dbName].stores[storeName];
@@ -759,6 +961,13 @@ class OrmIndexDb {
         return data;
     }
 
+    /**
+     * _transactionReadOnly
+     * @param {string} dbName
+     * @param {string} storeName
+     * @returns {IDBTransaction}
+     * @private
+     */
     _transactionReadOnly(dbName, storeName) {
         const dbObj = this.__schema[dbName];
         const db = dbObj.db;
@@ -766,6 +975,13 @@ class OrmIndexDb {
         return db?.transaction(storeName, configs.READ_ONLY);
     }
 
+    /**
+     * _transactionReadWrite
+     * @param {string} dbName
+     * @param {string} storeName
+     * @returns {IDBTransaction}
+     * @private
+     */
     _transactionReadWrite(dbName, storeName) {
         const dbObj = this.__schema[dbName];
         const db = dbObj.db;
@@ -773,6 +989,12 @@ class OrmIndexDb {
         return db.transaction(storeName, configs.READ_WRITE);
     }
 
+    /**
+     * _checkActiveDB
+     * @param {string} dbName
+     * @returns {boolean}
+     * @private
+     */
     _checkActiveDB(dbName) {
         let dbObj = this.__schema[dbName];
         let db = dbObj.db;
@@ -786,6 +1008,10 @@ class OrmIndexDb {
     // ORM Operation Functions ------------------
     // Public -----------------------------------
 
+    /**
+     * build
+     * @returns {Promise<OrmIndexDb>}
+     */
     async build() {
 
         return new Promise(async (resolve, reject) => {
@@ -831,6 +1057,12 @@ class OrmIndexDb {
 
     // Private ----------------------------------
 
+    /**
+     * _compareStoresToVersionChange
+     * @param {string} dbName
+     * @returns {Promise<boolean>}
+     * @private
+     */
     _compareStoresToVersionChange(dbName) {
         return new Promise(async (resolve, reject) => {
             try {
@@ -859,10 +1091,14 @@ class OrmIndexDb {
                 resolve(false)
             }
         });
-
-
     }
 
+    /**
+     * _rebuildDB
+     * @param {string} dbName
+     * @returns {Promise<boolean|Error>}
+     * @private
+     */
     _rebuildDB(dbName) {
         return new Promise(async (resolve, reject) => {
             try {
@@ -879,12 +1115,17 @@ class OrmIndexDb {
         });
     }
 
+    /**
+     * _setCurrentVersionOnSchema
+     * @param dbName
+     * @returns {Promise<number>}
+     * @private
+     */
     _setCurrentVersionOnSchema(dbName) {
         return new Promise(async (resolve, reject) => {
             try {
                 this.__schema[dbName].currentVersion = await this.getDataBaseVersion(dbName);
-
-                resolve(1);
+                resolve(this.__schema[dbName].currentVersion);
             } catch (e) {
                 resolve(1);
             }
@@ -895,19 +1136,31 @@ class OrmIndexDb {
     //-------------------------------------------
     //-------------------------------------------
 
-    _addDataBaseToClass(db) {
+    /**
+     * _addDataBaseToClass
+     * @param {string} dbName
+     * @private
+     */
+    _addDataBaseToClass(dbName) {
         let dbObj = {};
 
-        for (let j in this.__schema[db].stores) {
+        for (let j in this.__schema[dbName].stores) {
             dbObj[j] = {
-                ...this.__schema[db].stores[j],
-                ...this._addDataBaseHandler(db, j)
+                ...this.__schema[dbName].stores[j],
+                ...this._addDataBaseHandler(dbName, j)
             }
         }
 
-        this[db] = dbObj;
+        this[dbName] = dbObj;
     }
 
+    /**
+     * _addDataBaseHandler
+     * @param {string} dbName
+     * @param {string} storeName
+     * @returns {object}
+     * @private
+     */
     _addDataBaseHandler(dbName, storeName) {
 
         let ths = this;
