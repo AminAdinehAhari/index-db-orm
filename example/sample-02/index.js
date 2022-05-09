@@ -4,14 +4,14 @@ const orm = new window.ormIndexDB.orm();
 // function ----------------------------------------
 //--------------------------------------------------
 
-const testInsertMoreData = async function(){
+const testInsertMoreData = async function () {
     for (let i = 0; i < 500; i++) {
         try {
             const res = await orm.insert("pandosLogs", "logError", {
                 timestamp: Date.now(),
                 mode: ['error', 'success', 'warning'][Math.floor(2.9 * Math.random())],
                 value: Math.random(),
-                amount : Math.random()
+                amount: Math.random()
             });
             // console.log(res);
         } catch (e) {
@@ -23,8 +23,8 @@ const testInsertMoreData = async function(){
                 timestamp: Date.now(),
                 mode: ['error', 'success', 'warning'][Math.floor(2.9 * Math.random())],
                 value: Math.random(),
-                amount : Math.random(),
-                mail : `${['mail', 'email', 'e-mail'][Math.floor(2.9 * Math.random())]}${Math.floor(10000*Math.random())}@${['gmail', 'yahoo', 'webmail'][Math.floor(2.9 * Math.random())]}.${['ir', 'co', 'com'][Math.floor(2.9 * Math.random())]}`
+                amount: Math.random(),
+                mail: `${['mail', 'email', 'e-mail'][Math.floor(2.9 * Math.random())]}${Math.floor(10000 * Math.random())}@${['gmail', 'yahoo', 'webmail'][Math.floor(2.9 * Math.random())]}.${['ir', 'co', 'com'][Math.floor(2.9 * Math.random())]}`
             });
             // console.log(res);
         } catch (e) {
@@ -33,7 +33,7 @@ const testInsertMoreData = async function(){
     }
 };
 
-const testFindData = async function(){
+const testFindData = async function () {
 
     try {
         const res = await orm.insert("pandosLogs", "logHistory", {
@@ -44,32 +44,31 @@ const testFindData = async function(){
 
         console.log(res);
 
-        const find1 = await orm.find("pandosLogs", "logHistory",res.__pk);
+        const find1 = await orm.find("pandosLogs", "logHistory", res.__pk);
 
         console.log(find1);
 
-        const find2 = await orm.find("pandosLogs", "logHistory",res.timestamp,'timestamp');
+        const find2 = await orm.find("pandosLogs", "logHistory", res.timestamp, 'timestamp');
 
         console.log(find2);
 
-        const find3 = await orm.find("pandosLogs", "logHistory",res.mode,'mode');
+        const find3 = await orm.find("pandosLogs", "logHistory", res.mode, 'mode');
 
         console.log(find3);
 
-        const find4 = await orm.find("pandosLogs", "logHistory",res.value,'value');
+        const find4 = await orm.find("pandosLogs", "logHistory", res.value, 'value');
 
         console.log(find4);
 
 
-
-    }catch (e) {
+    } catch (e) {
         console.log(e);
     }
 
 
 };
 
-const testPutData = async function(){
+const testPutData = async function () {
     try {
         const res_insert = await orm.insert("pandosLogs", "logHistory", {
             timestamp: 10000000000,
@@ -79,21 +78,21 @@ const testPutData = async function(){
 
         console.log(res_insert);
 
-        const res_update = await orm.update("pandosLogs", "logHistory",{
+        const res_update = await orm.update("pandosLogs", "logHistory", {
             ...res_insert,
             mode: "test",
-            value : 0.75
+            value: 0.75
         });
 
         console.log(res_update);
 
 
-    }catch (e) {
+    } catch (e) {
 
     }
 };
 
-const testDeleteData = async function(){
+const testDeleteData = async function () {
     try {
         const res_insert = await orm.insert("pandosLogs", "logHistory", {
             timestamp: 10000000000,
@@ -103,17 +102,17 @@ const testDeleteData = async function(){
 
         console.log(res_insert);
 
-        const res_delete = await orm.delete("pandosLogs", "logHistory",res_insert.__pk);
+        const res_delete = await orm.delete("pandosLogs", "logHistory", res_insert.__pk);
 
         console.log(res_delete);
 
 
-    }catch (e) {
+    } catch (e) {
 
     }
 };
 
-const testGetAllData = async function(){
+const testGetAllData = async function () {
     try {
         await testInsertMoreData();
 
@@ -121,12 +120,12 @@ const testGetAllData = async function(){
 
         const res_all = await orm.all("pandosLogs", "logHistory");
 
-    }catch (e) {
+    } catch (e) {
         console.log(e);
     }
 };
 
-const testGetWhereCondition = async function(){
+const testGetWhereCondition = async function () {
     try {
 
         await testInsertMoreData();
@@ -134,87 +133,87 @@ const testGetWhereCondition = async function(){
         console.log("insert complete ---------------------");
 
         console.info("where = ");
-        const res_where_1 = await orm.where("pandosLogs", "logHistory",'mode','=','error');
+        const res_where_1 = await orm.where("pandosLogs", "logHistory", 'mode', '=', 'error');
         console.log(res_where_1);
 
         console.info("where between ");
-        const res_where_2 = await orm.where("pandosLogs", "logHistory",'amount','between',[0.35,0.45]);
+        const res_where_2 = await orm.where("pandosLogs", "logHistory", 'amount', 'between', [0.35, 0.45]);
         console.log(res_where_2);
 
         console.info("where > ");
-        const res_where_3 = await orm.where("pandosLogs", "logHistory",'amount','>',0.9);
+        const res_where_3 = await orm.where("pandosLogs", "logHistory", 'amount', '>', 0.9);
         console.log(res_where_3);
 
         console.info("where < ");
-        const res_where_4 = await orm.where("pandosLogs", "logHistory",'amount','<',0.2);
+        const res_where_4 = await orm.where("pandosLogs", "logHistory", 'amount', '<', 0.2);
         console.log(res_where_4);
 
         console.info("where like | %like% ");
         // const res_where_5 = await orm.where("pandosLogs", "logHistory",'mail','%like%',"49@gma");
-        const res_where_5 = await orm.where("pandosLogs", "logHistory",'mail','like',"49@gma");
+        const res_where_5 = await orm.where("pandosLogs", "logHistory", 'mail', 'like', "49@gma");
         console.log(res_where_5);
 
         console.info("where like%");
-        const res_where_6 = await orm.where("pandosLogs", "logHistory",'mail','like%',"e-mail");
+        const res_where_6 = await orm.where("pandosLogs", "logHistory", 'mail', 'like%', "e-mail");
         console.log(res_where_6);
 
         console.info("where %like");
-        const res_where_7 = await orm.where("pandosLogs", "logHistory",'mail','%like',"@gmail.co");
+        const res_where_7 = await orm.where("pandosLogs", "logHistory", 'mail', '%like', "@gmail.co");
         console.log(res_where_7);
 
         console.info("where match");
-        const res_where_8 = await orm.where("pandosLogs", "logHistory",'mail','match','^e\-mail1(.*)\.@gmail\.[a-zA-Z]{2}$');
+        const res_where_8 = await orm.where("pandosLogs", "logHistory", 'mail', 'match', '^e\-mail1(.*)\.@gmail\.[a-zA-Z]{2}$');
         console.log(res_where_8);
 
-    }catch (e) {
+    } catch (e) {
         console.log(e);
     }
 };
 
-const testGetMultiWhereCondition = async function(){
+const testGetMultiWhereCondition = async function () {
     try {
 
         await testInsertMoreData();
 
         console.log("insert complete ---------------------");
 
-        const res_where_1 = await orm.multiWhere("pandosLogs", "logHistory",[
-            {index:'mode',operator:'=',value:'error'},
-            {index:'amount',operator:'between',value:[0,0.75]},
-            {index:'amount',operator:'>',value:0.2},
-            {index:'amount',operator:'<',value:0.5}
-        ],'or');
+        const res_where_1 = await orm.multiWhere("pandosLogs", "logHistory", [
+            {index: 'mode', operator: '=', value: 'error'},
+            {index: 'amount', operator: 'between', value: [0, 0.75]},
+            {index: 'amount', operator: '>', value: 0.2},
+            {index: 'amount', operator: '<', value: 0.5}
+        ], 'or');
         console.log(res_where_1);
-        console.log([...new Set(res_where_1.map(it=>it.__pk))]);
+        console.log([...new Set(res_where_1.map(it => it.__pk))]);
 
-        const res_where_2 = await orm.multiWhere("pandosLogs", "logHistory",[
-            {index:'mode',operator:'=',value:'error'},
-            {index:'amount',operator:'between',value:[0,0.75]},
-            {index:'amount',operator:'>',value:0.2},
-            {index:'amount',operator:'<',value:0.5}
-        ],'and');
+        const res_where_2 = await orm.multiWhere("pandosLogs", "logHistory", [
+            {index: 'mode', operator: '=', value: 'error'},
+            {index: 'amount', operator: 'between', value: [0, 0.75]},
+            {index: 'amount', operator: '>', value: 0.2},
+            {index: 'amount', operator: '<', value: 0.5}
+        ], 'and');
         console.log(res_where_2);
 
 
-    }catch (e) {
+    } catch (e) {
         console.log(e);
     }
 };
 
-const clearStore = async function(){
+const clearStore = async function () {
     try {
         await testInsertMoreData();
 
         console.log("insert data --------------");
 
-        setTimeout(async function(){
+        setTimeout(async function () {
             await orm.clearStore("pandosLogs", "logError");
 
             console.log("clear store --------------");
-        },10000)
+        }, 10000)
 
 
-    }catch (e) {
+    } catch (e) {
 
     }
 };
@@ -224,26 +223,26 @@ const clearStore = async function(){
 // direct call -------------------------------------
 //--------------------------------------------------
 
-const testDirectCallInsertMoreData = async function(){
+const testDirectCallInsertMoreData = async function () {
     for (let i = 0; i < 500; i++) {
         try {
             const res = await orm?.pandosLogs?.logError?.insert({
                 timestamp: Date.now(),
                 mode: ['error', 'success', 'warning'][Math.floor(2.9 * Math.random())],
                 value: Math.random(),
-                amount : Math.random()
+                amount: Math.random()
             })
 
         } catch (e) {
             console.log(e);
         }
 
-        try{
+        try {
             const res = await orm?.pandosLogs?.logHistory?.insert({
                 timestamp: Date.now(),
                 mode: ['error', 'success', 'warning'][Math.floor(2.9 * Math.random())],
                 value: Math.random(),
-                amount : Math.random()
+                amount: Math.random()
             })
             // console.log(res);
         } catch (e) {
@@ -253,10 +252,10 @@ const testDirectCallInsertMoreData = async function(){
     }
 };
 
-const testDirectCallFindData = async function(){
+const testDirectCallFindData = async function () {
 
     try {
-        const res = await orm?.pandosLogs?.logHistory?.insert( {
+        const res = await orm?.pandosLogs?.logHistory?.insert({
             timestamp: 10000000000,
             mode: "amin",
             value: 0.25
@@ -268,27 +267,27 @@ const testDirectCallFindData = async function(){
 
         console.log(find1);
 
-        const find2 = await orm?.pandosLogs?.logHistory?.find(res.timestamp,'timestamp');
+        const find2 = await orm?.pandosLogs?.logHistory?.find(res.timestamp, 'timestamp');
 
         console.log(find2);
 
-        const find3 = await orm?.pandosLogs?.logHistory?.find(res.mode,'mode');
+        const find3 = await orm?.pandosLogs?.logHistory?.find(res.mode, 'mode');
 
         console.log(find3);
 
-        const find4 = await orm?.pandosLogs?.logHistory?.find(res.value,'value');
+        const find4 = await orm?.pandosLogs?.logHistory?.find(res.value, 'value');
 
         console.log(find4);
 
 
-    }catch (e) {
+    } catch (e) {
         console.log(e);
     }
 
 
 };
 
-const testDirectCallPutData = async function(){
+const testDirectCallPutData = async function () {
     try {
         const res_insert = await orm?.pandosLogs?.logHistory?.insert({
             timestamp: 10000000000,
@@ -301,20 +300,20 @@ const testDirectCallPutData = async function(){
         const res_update = await orm?.pandosLogs?.logHistory?.update({
             ...res_insert,
             mode: "test",
-            value : 0.75
+            value: 0.75
         });
 
         console.log(res_update);
 
 
-    }catch (e) {
+    } catch (e) {
 
     }
 };
 
-const testDirectCallDeleteData = async function(){
+const testDirectCallDeleteData = async function () {
     try {
-        const res_insert = await orm?.pandosLogs?.logHistory?.insert( {
+        const res_insert = await orm?.pandosLogs?.logHistory?.insert({
             timestamp: 10000000000,
             mode: "amin",
             value: 0.25
@@ -327,12 +326,12 @@ const testDirectCallDeleteData = async function(){
         console.log(res_delete);
 
 
-    }catch (e) {
+    } catch (e) {
 
     }
 };
 
-const testDirectCallGetAllData = async function(){
+const testDirectCallGetAllData = async function () {
     try {
 
         await testDirectCallInsertMoreData();
@@ -343,12 +342,12 @@ const testDirectCallGetAllData = async function(){
 
         console.log(res_all);
 
-    }catch (e) {
+    } catch (e) {
         console.log(e);
     }
 };
 
-const testDirectCallGetWhereCondition = async function(){
+const testDirectCallGetWhereCondition = async function () {
     try {
 
         await testDirectCallInsertMoreData();
@@ -356,70 +355,64 @@ const testDirectCallGetWhereCondition = async function(){
         console.log("insert complete ---------------------");
 
         console.info("where = ");
-        const res_where_1 = await orm?.pandosLogs?.logHistory?.where('mode','=','error');
+        const res_where_1 = await orm?.pandosLogs?.logHistory?.where('mode', '=', 'error');
         console.log(res_where_1);
 
         console.info("where between ");
-        const res_where_2 = await orm?.pandosLogs?.logHistory?.where('amount','between',[0.35,0.45]);
+        const res_where_2 = await orm?.pandosLogs?.logHistory?.where('amount', 'between', [0.35, 0.45]);
         console.log(res_where_2);
 
         console.info("where > ");
-        const res_where_3 = await orm?.pandosLogs?.logHistory?.where('amount','>',0.9);
+        const res_where_3 = await orm?.pandosLogs?.logHistory?.where('amount', '>', 0.9);
         console.log(res_where_3);
 
         console.info("where < ");
-        const res_where_4 = await orm?.pandosLogs?.logHistory?.where('amount','<',0.2);
+        const res_where_4 = await orm?.pandosLogs?.logHistory?.where('amount', '<', 0.2);
         console.log(res_where_4);
 
         console.info("where like | %like% ");
         // const res_where_5 = await orm?.pandosLogs?.logHistory?.where('mail','%like%',"49@gma");
-        const res_where_5 = await orm?.pandosLogs?.logHistory?.where('mail','like',"49@gma");
+        const res_where_5 = await orm?.pandosLogs?.logHistory?.where('mail', 'like', "49@gma");
         console.log(res_where_5);
 
         console.info("where like%");
-        const res_where_6 = await orm?.pandosLogs?.logHistory?.where('mail','like%',"e-mail");
+        const res_where_6 = await orm?.pandosLogs?.logHistory?.where('mail', 'like%', "e-mail");
         console.log(res_where_6);
 
         console.info("where %like");
-        const res_where_7 = await orm?.pandosLogs?.logHistory?.where('mail','%like',"@gmail.co");
+        const res_where_7 = await orm?.pandosLogs?.logHistory?.where('mail', '%like', "@gmail.co");
         console.log(res_where_7);
 
         console.info("where match");
-        const res_where_8 = await orm?.pandosLogs?.logHistory?.where('mail','match','^e\-mail1(.*)\.@gmail\.[a-zA-Z]{2}$');
+        const res_where_8 = await orm?.pandosLogs?.logHistory?.where('mail', 'match', '^e\-mail1(.*)\.@gmail\.[a-zA-Z]{2}$');
         console.log(res_where_8);
 
 
-
-    }catch (e) {
+    } catch (e) {
         console.log(e);
     }
 };
 
-const directCallClearStore = async function(){
+const directCallClearStore = async function () {
     try {
         await testDirectCallInsertMoreData();
 
         console.log("insert data --------------");
 
-        setTimeout(async function(){
+        setTimeout(async function () {
             await orm?.pandosLogs?.logError?.clear();
 
             console.log("clear store --------------");
-        },10000)
+        }, 10000)
 
 
-    }catch (e) {
+    } catch (e) {
         console.log(e);
     }
 };
 
 
-
-
-
-
-
-orm.removeAllDataBase().then(function(res) {
+orm.removeAllDataBase().then(function (res) {
     orm
         .addDB({
             name: "pandosLogs",
@@ -429,7 +422,7 @@ orm.removeAllDataBase().then(function(res) {
                     indexes: [
                         {name: 'timestamp', keyPath: 'timestamp', option: {unique: false}},
                         {name: 'mode', keyPath: 'mode', option: {unique: false}},
-                        {name: 'multiIndex', keyPath: ['mode' , 'timestamp'], option: {unique: false}},
+                        {name: 'multiIndex', keyPath: ['mode', 'timestamp'], option: {unique: false}},
                     ]
                 },
                 {
@@ -457,7 +450,7 @@ orm.removeAllDataBase().then(function(res) {
             console.log("pandousChats rebuild (((((((((((((((((((((");
         })
         .build()
-        .then(async function(res){
+        .then(async function (res) {
             console.log("on ready");
 
             // await testInsertMoreData();
@@ -482,7 +475,6 @@ orm.removeAllDataBase().then(function(res) {
             //--------------------------
 
 
-
             // await testDirectCallInsertMoreData();
 
             // await testDirectCallFindData();
@@ -495,7 +487,7 @@ orm.removeAllDataBase().then(function(res) {
 
             // await testDirectCallGetAllData();
 
-            await testDirectCallGetWhereCondition();
+            // await testDirectCallGetWhereCondition();
 
             // await directCallClearStore();
 
@@ -505,20 +497,38 @@ orm.removeAllDataBase().then(function(res) {
             //--------------------------
 
 
-
-
-
-
-
-            console.log(orm);
+            // try {
+            //     const res = await orm.insert("pandousChats", "users", {
+            //         userId: 2342,
+            //         text: "345345345"
+            //     });
+            //     console.log(res);
+            //
+            //     const res2 = await orm.update("pandousChats", "users", {
+            //         ...res,
+            //         userId: 23452,
+            //         text: "34534000005345"
+            //     });
+            //
+            //     console.log(res2);
+            //
+            // } catch (e) {
+            //     console.log(e);
+            // }
+            //
+            //
+            // let dataBases = await orm.getAllDatabases();
+            //
+            //
+            // console.log(dataBases);
 
         })
-        .catch(function(err) {
+        .catch(function (err) {
             console.log("catch");
             console.error(err);
         });
 
-}).catch(function(error) {
+}).catch(function (error) {
     console.log(error);
 });
 

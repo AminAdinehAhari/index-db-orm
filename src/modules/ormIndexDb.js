@@ -2,6 +2,10 @@
 import textMessage from "./helper/textMessage";
 import configs from "./helper/configs";
 
+const fakerIDB = require("fake-indexeddb");
+const fakerIDBKeyRange = require("fake-indexeddb/lib/FDBKeyRange");
+const fakerIDBTransaction = require("fake-indexeddb/lib/FDBTransaction");
+
 class OrmIndexDb {
 
     IDB = null;
@@ -9,12 +13,14 @@ class OrmIndexDb {
     IDBKeyRange = null;
     __isSupport = false;
     __schema = {};
+    __mode = 'product';
 
 
     /**
      * constructor : check Browser Support
      */
-    constructor() {
+    constructor(mode = 'product') {
+        this.__mode = mode;
         try {
             this.checkBrowserSupport();
         } catch (e) {
@@ -28,9 +34,16 @@ class OrmIndexDb {
      * checkBrowserSupport
      */
     checkBrowserSupport() {
-        this.IDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
-        this.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction || {READ_WRITE: "readwrite"}; // This line should only be needed if it is needed to support the object's constants for older browsers
-        this.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange;
+        if (this.__mode === 'test') {
+            this.IDB = fakerIDB;
+            this.IDBTransaction = fakerIDBTransaction;
+            this.IDBKeyRange = fakerIDBKeyRange;
+        } else {
+            this.IDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+            this.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction || {READ_WRITE: "readwrite"}; // This line should only be needed if it is needed to support the object's constants for older browsers
+            this.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange;
+        }
+
 
         if (!!!this.IDB) {
             this.__isSupport = false;
@@ -117,14 +130,49 @@ class OrmIndexDb {
     /**
      * removeDataBase
      * @param {string} dataBaseName
-     * @returns {Promise<OrmIndexDb>}
+     * @returns {Promise<OrmIndexDb|error>}
      */
     async removeDataBase(dataBaseName) {
         try {
             await this.IDB.deleteDatabase(dataBaseName);
+            this._removeDataBaseOfSchema(dataBaseName);
+            this._removeDataBaseOfClass(dataBaseName);
             return this;
-        } catch (e) {
+        } catch (error) {
+            console.log(error);
+            return error;
+        }
+    }
+
+    // Private -----------------------------------
+
+    /**
+     * _removeDataBaseOfSchema
+     * @param {string} dataBaseName
+     * @returns {Error|OrmIndexDb}
+     * @private
+     */
+    _removeDataBaseOfSchema(dataBaseName) {
+        try {
+            delete this.__schema[dataBaseName];
             return this;
+        } catch (error) {
+            return error;
+        }
+    }
+
+    /**
+     * _removeDataBaseOfClass
+     * @param {string} dataBaseName
+     * @returns {Error|OrmIndexDb}
+     * @private
+     */
+    _removeDataBaseOfClass(dataBaseName) {
+        try {
+            delete this[dataBaseName];
+            return this;
+        } catch (error) {
+            return error;
         }
     }
 
@@ -132,7 +180,6 @@ class OrmIndexDb {
     //-------------------------------------------
     //-------------------------------------------
     //-------------------------------------------
-
 
     // DB Object Functions ----------------------
     // Public -----------------------------------
@@ -212,6 +259,7 @@ class OrmIndexDb {
             try {
                 const request = this.IDB.open(name, version);
 
+
                 request.onerror = event => {
                     reject(version, event.target?.error);
                 };
@@ -236,7 +284,6 @@ class OrmIndexDb {
 
         });
     }
-
 
     /**
      * _closeDB
@@ -264,6 +311,7 @@ class OrmIndexDb {
     _rebuildDBEvent(name) {
         if (this.__schema[name].isBuild) {
             const ev = this.__schema[name].onRebuild;
+
             if (!!ev) {
                 ev();
                 this.__schema[name].isBuild = false;
@@ -489,7 +537,7 @@ class OrmIndexDb {
      * @param {Object} data
      * @returns {Promise<Error|Object>}
      */
-    async insert(dbName, storeName, data) {
+    insert(dbName, storeName, data) {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -498,8 +546,8 @@ class OrmIndexDb {
                 }
 
                 const newData = this._insertConvertDataEntry(dbName, storeName, data);
-
                 let transaction = this._transactionReadWrite(dbName, storeName).objectStore(storeName);
+
                 let request = transaction?.add(newData);
                 let ths = this;
 
@@ -508,7 +556,7 @@ class OrmIndexDb {
                     if (!!req.error) {
                         reject(req.error);
                     } else if (!!req.result) {
-                        resolve(ths.find(dbName, storeName, req.result))
+                        resolve(ths.find(dbName, storeName, req.result,configs.KEY_PATH))
                     } else {
                         reject(new Error(textMessage.ErrorSystem))
                     }
@@ -531,7 +579,7 @@ class OrmIndexDb {
      * @param {object} data
      * @returns {Promise<Error|Object>}
      */
-    async update(dbName, storeName, data) {
+    update(dbName, storeName, data) {
 
         return new Promise(async (resolve, reject) => {
             try {
@@ -540,9 +588,8 @@ class OrmIndexDb {
                     await this._openDB(dbName);
                 }
 
-                let storeObj = this.__schema[dbName].stores[storeName];
-                let storeKeyPath = storeObj.keyPath;
-                const _pk = data[storeKeyPath];
+                const _pk = data[configs.KEY_PATH];
+
                 const newData = this._updateConvertDataEntry(dbName, storeName, data);
 
                 let transaction = this._transactionReadWrite(dbName, storeName).objectStore(storeName);
@@ -552,19 +599,21 @@ class OrmIndexDb {
 
                 request.onsuccess = event => {
 
-                    const dt = event.target.result;
+                    // const dt = event.target.result;
                     let requestUpdate = transaction?.put(newData);
 
                     requestUpdate.onerror = ev => {
                         let req = ev.target;
                         reject(!!req.error ? req.error : new Error(textMessage.ErrorSystem));
                     };
-                    requestUpdate.onsuccess = ev => {
+                    requestUpdate.onsuccess = async ev => {
                         let req = ev.target;
+
                         if (!!req.error) {
                             reject(req.error);
                         } else if (!!req.result) {
-                            resolve(ths.find(dbName, storeName, req.result))
+                            let find_res = await ths.find(dbName, storeName, req.result, configs.KEY_PATH);
+                            resolve(find_res)
                         } else {
                             reject(new Error(textMessage.ErrorSystem))
                         }
@@ -592,7 +641,7 @@ class OrmIndexDb {
      * @param {string|number} _pk
      * @returns {Promise<Error|boolean>}
      */
-    async delete(dbName, storeName, _pk) {
+    delete(dbName, storeName, _pk) {
 
         return new Promise(async (resolve, reject) => {
             try {
@@ -626,30 +675,30 @@ class OrmIndexDb {
      * find
      * @param {string} dbName
      * @param {string} storeName
-     * @param {object} value
+     * @param {string|number} value
      * @param {string} searchPk
      * @returns {Promise<object>}
      */
-    async find(dbName, storeName, value, searchPk = null) {
+    find(dbName, storeName, value, searchPk = null) {
         return new Promise(async (resolve, reject) => {
             try {
-
-                const keyRangeValue = this.IDBKeyRange.only(value);
-                let result = null;
 
                 if (!this._checkActiveDB(dbName)) {
                     await this._openDB(dbName);
                 }
 
-                let storeObj = this.__schema[dbName].stores[storeName];
-                let storeKeyPath = storeObj.keyPath;
+                let skp = !!searchPk ? searchPk : configs.KEY_PATH;
+
+                const keyRangeValue = this.IDBKeyRange.only(value);
+                let result = null;
 
                 let transaction = this._transactionReadOnly(dbName, storeName).objectStore(storeName);
-                let myIndex = transaction.index(!!searchPk ? searchPk : storeKeyPath);
+                let myIndex = transaction.index(skp);
                 const getCursorRequest = myIndex.openCursor(keyRangeValue);
 
                 getCursorRequest.onsuccess = function (event) {
                     const cursor = event.target.result;
+
                     if (cursor && !!!result) {
                         result = cursor.value;
                         cursor.continue();
@@ -676,7 +725,7 @@ class OrmIndexDb {
      * @param {string} storeName
      * @returns {Promise<array>}
      */
-    async all(dbName, storeName) {
+    all(dbName, storeName) {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -710,10 +759,10 @@ class OrmIndexDb {
      * @param {string} storeName
      * @param {string} conditionIndex
      * @param {string} conditionOperator includes : = , > , >= , <= , < ,  between , betweenInclude , like , %like , like% , %like% , match
-     * @param {string|array} conditionValues
+     * @param {number|string|array} conditionValues
      * @returns {Promise<array>}
      */
-    async where(dbName, storeName, conditionIndex, conditionOperator, conditionValues) {
+    where(dbName, storeName, conditionIndex, conditionOperator, conditionValues) {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -724,29 +773,29 @@ class OrmIndexDb {
                 let keyRangeValue = null;
                 let result = [];
 
-                const cursorConditionOperator = ['like', '%like', 'like%', '%like%','match'];
+                const cursorConditionOperator = ['like', '%like', 'like%', '%like%', 'match'];
 
                 switch (conditionOperator) {
                     case "=":
                         keyRangeValue = this.IDBKeyRange?.only(conditionValues);
                         break;
                     case ">":
-                        keyRangeValue = this.IDBKeyRange?.lowerBound(conditionValues, false);
-                        break;
-                    case ">=":
                         keyRangeValue = this.IDBKeyRange?.lowerBound(conditionValues, true);
                         break;
-                    case "<":
-                        keyRangeValue = this.IDBKeyRange?.upperBound(conditionValues, false);
+                    case ">=":
+                        keyRangeValue = this.IDBKeyRange?.lowerBound(conditionValues, false);
                         break;
-                    case "<=":
+                    case "<":
                         keyRangeValue = this.IDBKeyRange?.upperBound(conditionValues, true);
                         break;
+                    case "<=":
+                        keyRangeValue = this.IDBKeyRange?.upperBound(conditionValues, false);
+                        break;
                     case "between":
-                        keyRangeValue = this.IDBKeyRange?.bound(...conditionValues, false, false);
+                        keyRangeValue = this.IDBKeyRange?.bound(...conditionValues, true, true);
                         break;
                     case "betweenInclude":
-                        keyRangeValue = this.IDBKeyRange?.bound(...conditionValues, true, true);
+                        keyRangeValue = this.IDBKeyRange?.bound(...conditionValues, false, false);
                         break;
                     default :
                         keyRangeValue = null;
@@ -781,42 +830,68 @@ class OrmIndexDb {
 
                     if (!!conditionStringValue) {
 
+                        let keyPaths = this._getStoreIndexKeyPaths(dbName,storeName,conditionIndex);
+
+
                         let transaction = this._transactionReadOnly(dbName, storeName).objectStore(storeName);
                         const getCursorRequest = transaction.openCursor();
 
                         getCursorRequest.onsuccess = function (event) {
                             const cursor = event.target.result;
+
                             if (!!cursor && !!cursor.value) {
 
-                                let searchValue = !!cursor.value[conditionIndex] ?
-                                    cursor.value[conditionIndex] : "";
+                                let searchValues = keyPaths.map(kp=>{
+                                    return {
+                                        value : !!cursor.value[kp] ? cursor.value[kp] : "",
+                                        result : false
+                                    };
+                                });
 
 
-                                if (conditionOperator === 'like' || conditionOperator === '%like%') {
-                                    let re = new RegExp(`^(.*){0,}${conditionStringValue}(.*){0,}$`, 'i');
+                                if (conditionOperator === 'like' ||
+                                    conditionOperator === '%like%' ||
+                                    conditionOperator === '%like' ||
+                                    conditionOperator === 'like%' ||
+                                    conditionOperator === 'match'
+                                ){
+                                    let re = null;
+                                    switch (conditionOperator) {
+                                        case "%like":
+                                            re = new RegExp(`^(.*){0,}${conditionStringValue}$`, 'i');
+                                            break;
+                                        case "%like%":
+                                            re = new RegExp(`^(.*){0,}${conditionStringValue}(.*){0,}$`, 'i');
+                                            break;
+                                        case "like":
+                                            re = new RegExp(`^(.*){0,}${conditionStringValue}(.*){0,}$`, 'i');
+                                            break;
+                                        case "like%":
+                                            re = new RegExp(`^${conditionStringValue}(.*){0,}$`, 'i');
+                                            break;
+                                        case "match":
+                                            re = new RegExp(conditionStringValue, 'i');
+                                            break;
+                                        default:
+                                            re = null;
+                                            break;
+                                    }
 
-                                    if (!!searchValue && searchValue.match(re)) {
+                                    let resultShare = searchValues.map(it=>{
+                                        return {
+                                            ...it,
+                                            result : !!it.value && !!re && !!it.value.match(re)
+                                        }
+                                    }).reduce((res,it)=>{
+                                        return res && it.result
+                                    },true);
+
+                                    if (resultShare){
                                         result.push(cursor.value);
                                     }
 
-                                } else if (conditionOperator === '%like') {
-                                    let re = new RegExp(`^(.*){0,}${conditionStringValue}$`, 'i');
+                                }else{
 
-                                    if (!!searchValue && searchValue.match(re)) {
-                                        result.push(cursor.value);
-                                    }
-                                } else if (conditionOperator === 'like%') {
-                                    let re = new RegExp(`^${conditionStringValue}(.*){0,}$`, 'i');
-
-                                    if (!!searchValue && searchValue.match(re)) {
-                                        result.push(cursor.value);
-                                    }
-                                } else if (conditionOperator === 'match') {
-                                    let re = new RegExp(conditionStringValue, 'i');
-
-                                    if (!!searchValue && searchValue.match(re)) {
-                                        result.push(cursor.value);
-                                    }
                                 }
 
                                 cursor.continue();
@@ -901,8 +976,8 @@ class OrmIndexDb {
             }
 
 
-        } catch (e) {
-            console.log(e);
+        } catch (error) {
+            console.log(error);
             return [];
         }
     }
@@ -941,6 +1016,8 @@ class OrmIndexDb {
                 newData[keyPath] = this._generatePkIndexValue();
             }
         }
+
+        newData[configs.KEY_PATH] = newData[keyPath];
 
         return newData;
     }
@@ -1001,6 +1078,33 @@ class OrmIndexDb {
         return !!db
     }
 
+    _getStoreIndexKeyPaths(dbName,storeName,indexName){
+        const indexesArray = this.__schema[dbName]?.stores[storeName]?.indexes;
+
+        if (!!indexesArray){
+            let indexObj = indexesArray.find(it=>{
+                return it.name === indexName
+            });
+
+            if (!!indexObj){
+                if (!!indexObj.keyPath){
+                    if (Array.isArray(indexObj.keyPath)){
+                        return indexObj.keyPath
+                    }else{
+                        return [indexObj.keyPath]
+                    }
+                }else{
+                    return [];
+                }
+            }else{
+                return [];
+            }
+
+        }else{
+            return [];
+        }
+    }
+
     //-------------------------------------------
     //-------------------------------------------
     //-------------------------------------------
@@ -1012,7 +1116,7 @@ class OrmIndexDb {
      * build
      * @returns {Promise<OrmIndexDb>}
      */
-    async build() {
+    build() {
 
         return new Promise(async (resolve, reject) => {
             try {
@@ -1041,13 +1145,10 @@ class OrmIndexDb {
                     }
                 }
 
+                for (let i in this.__schema) {
+                    this._rebuildDBEvent(i);
+                }
                 resolve(this);
-
-                setTimeout(() => {
-                    for (let i in this.__schema) {
-                        this._rebuildDBEvent(i);
-                    }
-                }, 20);
 
             } catch (e) {
                 reject(e);
@@ -1105,6 +1206,7 @@ class OrmIndexDb {
                 await this._closeDB(dbName);
                 await this.removeDataBase(dbName);
                 let res = await this._openDB(dbName);
+
                 if (res?.type === 'upgrade') {
                     await this._createDbStores(dbName);
                 }
@@ -1184,8 +1286,8 @@ class OrmIndexDb {
             where: function (conditionIndex, conditionOperator, conditionValues) {
                 return ths.where(dbName, storeName, conditionIndex, conditionOperator, conditionValues)
             },
-            multiWhere: function(conditions){
-                return ths.multiWhere(dbName, storeName, conditions)
+            multiWhere: function (conditions,operator = 'and') {
+                return ths.multiWhere(dbName, storeName, conditions , operator)
             },
             clear: function () {
                 return ths.clearStore(dbName, storeName)
