@@ -6,6 +6,9 @@ const fakerIDB = require("fake-indexeddb");
 const fakerIDBKeyRange = require("fake-indexeddb/lib/FDBKeyRange");
 const fakerIDBTransaction = require("fake-indexeddb/lib/FDBTransaction");
 
+const ormDBName = "___orm";
+const ormStorePagination = "paginate";
+
 class OrmIndexDb {
 
     IDB = null;
@@ -556,7 +559,7 @@ class OrmIndexDb {
                     if (!!req.error) {
                         reject(req.error);
                     } else if (!!req.result) {
-                        resolve(ths.find(dbName, storeName, req.result,configs.KEY_PATH))
+                        resolve(ths.find(dbName, storeName, req.result, configs.KEY_PATH))
                     } else {
                         reject(new Error(textMessage.ErrorSystem))
                     }
@@ -754,7 +757,143 @@ class OrmIndexDb {
     }
 
     /**
+     * count
+     * @param {string} dbName
+     * @param {string} storeName
+     * @param {object} query
+     * @returns {Promise<number>}
+     */
+    count(dbName, storeName,query=null) {
+        return new Promise(async (resolve, reject) => {
+            try {
+
+                if (!this._checkActiveDB(dbName)) {
+                    await this._openDB(dbName);
+                }
+
+                let transaction = this._transactionReadOnly(dbName, storeName).objectStore(storeName);
+                let request = transaction?.count(query);
+
+                request.onsuccess = event => {
+                    const dt = event.target.result;
+                    resolve(dt)
+                };
+
+                request.onerror = event => {
+                    let req = event.target;
+                    reject(!!req.error ? req.error : new Error(textMessage.ErrorSystem));
+                };
+
+
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+
+    /**
+     * paginate
+     * @param {string} dbName
+     * @param {string} storeName
+     * @param {?number} page
+     * @param {?number} total
+     * @returns {Promise<array>}
+     */
+    paginate(dbName, storeName, page=1, total = 20) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                if (!this._checkActiveDB(dbName)) {
+                    await this._openDB(dbName);
+                }
+
+                let transaction = this._transactionReadOnly(dbName, storeName).objectStore(storeName);
+                const request = transaction.openCursor();
+                const result = [];
+                const start = (page-1)*total;
+                let hasSkipped = false;
+
+                request.onsuccess = function (event) {
+                    const cursor = event.target.result;
+                    
+                    if(!hasSkipped && start > 0) {
+                        hasSkipped = true;
+                        cursor.advance(start);
+                        return;
+                    }
+                    if(cursor) {
+                        result.push(cursor.value);
+                        if(result.length < total) {
+                            cursor.continue();
+                        } else {
+                            resolve(result);
+                        }
+                    } else {
+                        resolve(result);
+                    }
+                };
+
+                request.onerror = function (event) {
+                    resolve([])
+                };
+
+
+            } catch (e) {
+                resolve([])
+            }
+        })
+    }
+
+
+    /**
      * where
+     * @param {string} dbName
+     * @param {string} storeName
+     * @param {string} conditionIndex
+     * @param {string} conditionOperator includes : = , > , >= , <= , < ,  between , betweenInclude , like , %like , like% , %like% , match
+     * @param {number|string|array} conditionValues
+     * @returns {Object}
+     */
+    where(dbName, storeName, conditionIndex, conditionOperator, conditionValues) {
+
+        const addCondition = (cIndex, cOperator, cValues) => {
+            whereObject.conditions.push({
+                index: cIndex,
+                operator: cOperator,
+                value: cValues
+            })
+        };
+
+        const ths = this;
+
+
+        const whereObject = {
+            dbName: dbName,
+            storeName: storeName,
+            conditions: [],
+            orm: ths,
+            where(cIndex, cOperator, cValues) {
+                addCondition(cIndex, cOperator, cValues);
+                return whereObject;
+            },
+            all(operation = 'and') {
+                return whereObject.orm._multiWhere(whereObject.dbName, whereObject.storeName, whereObject.conditions, operation);
+            }
+        };
+
+        addCondition(conditionIndex, conditionOperator, conditionValues);
+
+        return whereObject;
+
+    }
+
+    // -----------------------------------------
+    // private ---------------------------------
+    // -----------------------------------------
+
+
+    /**
+     * _where
      * @param {string} dbName
      * @param {string} storeName
      * @param {string} conditionIndex
@@ -762,7 +901,7 @@ class OrmIndexDb {
      * @param {number|string|array} conditionValues
      * @returns {Promise<array>}
      */
-    where(dbName, storeName, conditionIndex, conditionOperator, conditionValues) {
+    _where(dbName, storeName, conditionIndex, conditionOperator, conditionValues) {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -830,7 +969,7 @@ class OrmIndexDb {
 
                     if (!!conditionStringValue) {
 
-                        let keyPaths = this._getStoreIndexKeyPaths(dbName,storeName,conditionIndex);
+                        let keyPaths = this._getStoreIndexKeyPaths(dbName, storeName, conditionIndex);
 
 
                         let transaction = this._transactionReadOnly(dbName, storeName).objectStore(storeName);
@@ -841,10 +980,10 @@ class OrmIndexDb {
 
                             if (!!cursor && !!cursor.value) {
 
-                                let searchValues = keyPaths.map(kp=>{
+                                let searchValues = keyPaths.map(kp => {
                                     return {
-                                        value : !!cursor.value[kp] ? cursor.value[kp] : "",
-                                        result : false
+                                        value: !!cursor.value[kp] ? cursor.value[kp] : "",
+                                        result: false
                                     };
                                 });
 
@@ -854,7 +993,7 @@ class OrmIndexDb {
                                     conditionOperator === '%like' ||
                                     conditionOperator === 'like%' ||
                                     conditionOperator === 'match'
-                                ){
+                                ) {
                                     let re = null;
                                     switch (conditionOperator) {
                                         case "%like":
@@ -872,25 +1011,22 @@ class OrmIndexDb {
                                         case "match":
                                             re = new RegExp(conditionStringValue, 'i');
                                             break;
-                                        default:
-                                            re = null;
-                                            break;
                                     }
 
-                                    let resultShare = searchValues.map(it=>{
+                                    let resultShare = searchValues.map(it => {
                                         return {
                                             ...it,
-                                            result : !!it.value && !!re && !!it.value.match(re)
+                                            result: !!it.value && !!re && !!it.value.match(re)
                                         }
-                                    }).reduce((res,it)=>{
+                                    }).reduce((res, it) => {
                                         return res && it.result
-                                    },true);
+                                    }, true);
 
-                                    if (resultShare){
+                                    if (resultShare) {
                                         result.push(cursor.value);
                                     }
 
-                                }else{
+                                } else {
 
                                 }
 
@@ -921,14 +1057,14 @@ class OrmIndexDb {
     }
 
     /**
-     * multiWhere
+     * _multiWhere
      * @param {string} dbName
      * @param {string} storeName
      * @param {array} conditions
      * @param {string} operator
      * @returns {Promise<array>}
      */
-    async multiWhere(dbName, storeName, conditions = [], operator = 'and') {
+    async _multiWhere(dbName, storeName, conditions = [], operator = 'and') {
         try {
             let conditionList = Array.isArray(conditions) ? conditions : [];
             let result = [];
@@ -940,7 +1076,7 @@ class OrmIndexDb {
             for (let i = 0; i < conditionList.length; i++) {
                 if (!!conditionList[i].index && !!conditionList[i].operator && !!conditionList[i].value) {
                     try {
-                        cacheResult = await this.where(dbName, storeName, conditionList[i].index, conditionList[i].operator, conditionList[i].value);
+                        cacheResult = await this._where(dbName, storeName, conditionList[i].index, conditionList[i].operator, conditionList[i].value);
                     } catch (e) {
                         cacheResult = [];
                     }
@@ -981,8 +1117,6 @@ class OrmIndexDb {
             return [];
         }
     }
-
-    // private ---------------------------------
 
     /**
      * _generatePkIndexValue
@@ -1078,29 +1212,29 @@ class OrmIndexDb {
         return !!db
     }
 
-    _getStoreIndexKeyPaths(dbName,storeName,indexName){
+    _getStoreIndexKeyPaths(dbName, storeName, indexName) {
         const indexesArray = this.__schema[dbName]?.stores[storeName]?.indexes;
 
-        if (!!indexesArray){
-            let indexObj = indexesArray.find(it=>{
+        if (!!indexesArray) {
+            let indexObj = indexesArray.find(it => {
                 return it.name === indexName
             });
 
-            if (!!indexObj){
-                if (!!indexObj.keyPath){
-                    if (Array.isArray(indexObj.keyPath)){
+            if (!!indexObj) {
+                if (!!indexObj.keyPath) {
+                    if (Array.isArray(indexObj.keyPath)) {
                         return indexObj.keyPath
-                    }else{
+                    } else {
                         return [indexObj.keyPath]
                     }
-                }else{
+                } else {
                     return [];
                 }
-            }else{
+            } else {
                 return [];
             }
 
-        }else{
+        } else {
             return [];
         }
     }
@@ -1117,6 +1251,8 @@ class OrmIndexDb {
      * @returns {Promise<OrmIndexDb>}
      */
     build() {
+
+        this._addOrmDB();
 
         return new Promise(async (resolve, reject) => {
             try {
@@ -1157,6 +1293,23 @@ class OrmIndexDb {
     }
 
     // Private ----------------------------------
+    _addOrmDB() {
+        // this.addDB({
+        //     name: ormDBName,
+        //     stores: [
+        //         {
+        //             name: ormStorePagination,
+        //             indexes: [
+        //                 {name: 'code', keyPath: 'code', option: {unique: true}},
+        //                 {name: 'group', keyPath: 'group', option: {unique: false}},
+        //                 {name: 'page', keyPath: 'page', option: {unique: false}},
+        //                 {name: 'per', keyPath: 'per', option: {unique: false}},
+        //                 {name: 'max', keyPath: 'max', option: {unique: false}},
+        //             ]
+        //         }
+        //     ]
+        // })
+    }
 
     /**
      * _compareStoresToVersionChange
@@ -1283,17 +1436,21 @@ class OrmIndexDb {
             all: function () {
                 return ths.all(dbName, storeName)
             },
+            count: function (query=null) {
+                return ths.count(dbName, storeName, query)
+            },
+            paginate: function (page=1,perLength = 20) {
+                return ths.paginate(dbName, storeName, page, perLength)
+            },
             where: function (conditionIndex, conditionOperator, conditionValues) {
                 return ths.where(dbName, storeName, conditionIndex, conditionOperator, conditionValues)
-            },
-            multiWhere: function (conditions,operator = 'and') {
-                return ths.multiWhere(dbName, storeName, conditions , operator)
             },
             clear: function () {
                 return ths.clearStore(dbName, storeName)
             },
         }
     }
+
 
 }
 

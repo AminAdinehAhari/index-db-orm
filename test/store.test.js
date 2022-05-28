@@ -52,7 +52,6 @@ function generateString(length) {
 //--------------------------------------
 
 
-
 const orm = new ormClass('test');
 
 let totalResult = {};
@@ -751,7 +750,6 @@ describe('store', () => {
     });
 
 
-
     test('direct find : mistake database', async () => {
         try {
             await orm.mistakeDatabase.store1.find(1);
@@ -831,30 +829,43 @@ describe('store', () => {
     });
 
 
-
     //--------------------------------------------------
-    // all ---------------------------------------------
+    // all & count -------------------------------------
     //--------------------------------------------------
 
-    test('all : mistake database', async () => {
+    test('all & count : mistake database', async () => {
         try {
             await orm.all("mistakeDatabase", "store1");
             expect(false).toBeTruthy();
         } catch (e) {
             expect(true).toBeTruthy();
         }
-    });
 
-    test('all : mistake store', async () => {
         try {
-            await orm.all("testDataBase", "mistake1");
+            await orm.count("mistakeDatabase", "store1");
             expect(false).toBeTruthy();
         } catch (e) {
             expect(true).toBeTruthy();
         }
     });
 
-    test('all : simple test', async () => {
+    test('all & count : mistake store', async () => {
+        try {
+            await orm.all("testDataBase", "mistake1");
+            expect(false).toBeTruthy();
+        } catch (e) {
+            expect(true).toBeTruthy();
+        }
+
+        try {
+            await orm.count("testDataBase", "mistake1");
+            expect(false).toBeTruthy();
+        } catch (e) {
+            expect(true).toBeTruthy();
+        }
+    });
+
+    test('all & count : simple test', async () => {
         try {
             await orm.clearStore("testDataBase", "store2");
             let resInsert = await orm.insert("testDataBase", "store2", {
@@ -864,13 +875,15 @@ describe('store', () => {
                 key4: "cde",
             });
             let resFind = await orm.all("testDataBase", "store2");
-            expect(resFind.length === 1).toBeTruthy();
+
+            let resCount = await orm.count("testDataBase", "store2");
+            expect(resFind.length === resCount).toBeTruthy();
         } catch (e) {
             expect(false).toBeTruthy();
         }
     });
 
-    test('all : count simple test', async () => {
+    test('all & count : count simple test', async () => {
         try {
             await orm.clearStore("testDataBase", "store2");
             const maxCount = 12;
@@ -887,16 +900,18 @@ describe('store', () => {
             }
 
             let resFind = await orm.all("testDataBase", "store2");
-            expect(resFind.length === maxCount).toBeTruthy();
 
-            expect(true).toBeTruthy();
+            let resCount = await orm.count("testDataBase", "store2");
+
+            expect(resFind.length === maxCount && resCount === maxCount).toBeTruthy();
+
         } catch (e) {
             expect(false).toBeTruthy();
         }
     });
 
 
-    test('direct all : mistake database', async () => {
+    test('direct all & count : mistake database', async () => {
         try {
             await orm.mistakeDatabase.store1.all();
             expect(false).toBeTruthy();
@@ -905,16 +920,23 @@ describe('store', () => {
         }
     });
 
-    test('direct all : mistake store', async () => {
+    test('direct all & count : mistake store', async () => {
         try {
             await orm.testDataBase.mistake1.all();
             expect(false).toBeTruthy();
         } catch (e) {
             expect(true).toBeTruthy();
         }
+
+        try {
+            await orm.testDataBase.mistake1.count();
+            expect(false).toBeTruthy();
+        } catch (e) {
+            expect(true).toBeTruthy();
+        }
     });
 
-    test('direct all : simple test', async () => {
+    test('direct all & count : simple test', async () => {
         try {
             await orm.testDataBase.store2.clear();
             let resInsert = await orm.testDataBase.store2.insert( {
@@ -923,14 +945,15 @@ describe('store', () => {
                 key3: 100000,
                 key4: "cde",
             });
-            let resFind = await orm.testDataBase.store2.all(resInsert.__pk);
-            expect(resFind.length === 1).toBeTruthy();
+            let resFind = await orm.testDataBase.store2.all();
+            let resCount = await orm.testDataBase.store2.count();
+            expect(resFind.length === resCount).toBeTruthy();
         } catch (e) {
             expect(false).toBeTruthy();
         }
     });
 
-    test('direct all : count simple test', async () => {
+    test('direct all & count : count simple test', async () => {
         try {
 
             await orm.testDataBase.store2.clear();
@@ -948,10 +971,116 @@ describe('store', () => {
             }
 
             let resFind = await orm.testDataBase.store2.all();
-            expect(resFind.length === maxCount).toBeTruthy();
+            let resCount = await orm.testDataBase.store2.count();
+            expect(resFind.length === maxCount && resCount === maxCount).toBeTruthy();
 
             expect(true).toBeTruthy();
         } catch (e) {
+            expect(false).toBeTruthy();
+        }
+    });
+
+    //--------------------------------------------------
+    // lazy --------------------------------------------
+    //--------------------------------------------------
+
+    test('pagination : mistake database', async () => {
+        try {
+            await orm.pagination("mistakeDatabase", "store1");
+            expect(false).toBeTruthy();
+        } catch (e) {
+            expect(true).toBeTruthy();
+        }
+    });
+
+    test('pagination : mistake store', async () => {
+        try {
+            await orm.pagination("testDataBase", "mistake1");
+            expect(false).toBeTruthy();
+        } catch (e) {
+            expect(true).toBeTruthy();
+        }
+    });
+
+    test('pagination : simple test', async () => {
+        try {
+            await orm.clearStore("testDataBase", "store2");
+            const maxCount = 42;
+
+            for (let i =0 ; i < maxCount ; i++){
+                await orm.insert("testDataBase", "store2", {
+                    key1: i,
+                    key2: i,
+                    key3: 100000+i,
+                    key4: i
+                });
+
+                await new Promise((r) => setTimeout(r, 100));
+            }
+
+
+
+            let pg_count = 0;
+            for (let i=0; i<20;i++){
+                let pg = await orm.paginate("testDataBase", "store2",i+1,20);
+                pg_count += pg.length;
+            }
+
+            expect(pg_count === maxCount).toBeTruthy();
+
+        } catch (e) {
+            console.log(e)
+            expect(false).toBeTruthy();
+        }
+    });
+
+
+    test('direct pagination : mistake database', async () => {
+        try {
+            await orm.mistakeDatabase.store2.paginate();
+            expect(false).toBeTruthy();
+        } catch (e) {
+            expect(true).toBeTruthy();
+        }
+    });
+
+    test('direct pagination : mistake store', async () => {
+        try {
+            await orm.testDataBase.store5.paginate();
+            expect(false).toBeTruthy();
+        } catch (e) {
+            expect(true).toBeTruthy();
+        }
+    });
+
+    test('direct pagination : simple test', async () => {
+        try {
+            await orm.testDataBase.store2.clear();
+            const maxCount = 42;
+
+            for (let i =0 ; i < maxCount ; i++){
+                await orm.testDataBase.store2.insert({
+                    key1: i,
+                    key2: i,
+                    key3: 100000+i,
+                    key4: i
+                });
+
+                await new Promise((r) => setTimeout(r, 100));
+            }
+
+
+
+            let pg_count = 0;
+            for (let i=0; i<20;i++){
+                let pg = await orm.testDataBase.store2.paginate(i+1,20);
+                pg_count += pg.length;
+            }
+
+            expect(pg_count === maxCount).toBeTruthy();
+
+        } catch (e) {
+            console.log(e)
             expect(false).toBeTruthy();
         }
     });
@@ -999,71 +1128,76 @@ describe('store', () => {
                 const searchText = generateString(Math.ceil(4*Math.random()));
 
 
-                const select1 = await orm.where("testDataBase", "store3",'index1','=',dataList[n1].key1);
+                const select1 = await orm.where("testDataBase", "store3",'index1','=',dataList[n1].key1).all();
                 expect(select1.length === dataList.filter(it=>it.key1 === dataList[n1].key1).length).toBeTruthy();
 
                 await new Promise((r) => setTimeout(r, 100));
 
-                const select2 = await orm.where("testDataBase", "store3",'index5','=',[dataList[n2].key3,dataList[n2].key4]);
+                const select2 = await orm.where("testDataBase", "store3",'index5','=',[dataList[n2].key3,dataList[n2].key4]).all();
                 expect(select2.length === dataList.filter(it=>it.key3 === dataList[n2].key3 && it.key4 === dataList[n2].key4).length).toBeTruthy();
 
                 await new Promise((r) => setTimeout(r, 100));
 
-                const select3 = await orm.where("testDataBase", "store3",'index1','>',dataList[n3].key1);
+                const select3 = await orm.where("testDataBase", "store3",'index1','>',dataList[n3].key1).all();
                 expect(select3.length === dataList.filter(it=>it.key1 > dataList[n3].key1).length).toBeTruthy();
 
                 await new Promise((r) => setTimeout(r, 100));
 
-                const select4 = await orm.where("testDataBase", "store3",'index1','>=',dataList[n4].key1);
+                const select4 = await orm.where("testDataBase", "store3",'index1','>=',dataList[n4].key1).all();
                 expect(select4.length === dataList.filter(it=>it.key1 >= dataList[n4].key1).length).toBeTruthy();
 
                 await new Promise((r) => setTimeout(r, 100));
 
-                const select5 = await orm.where("testDataBase", "store3",'index1','<',dataList[n5].key1);
+                const select5 = await orm.where("testDataBase", "store3",'index1','<',dataList[n5].key1).all();
                 expect(select5.length === dataList.filter(it=>it.key1 < dataList[n5].key1).length).toBeTruthy();
 
                 await new Promise((r) => setTimeout(r, 100));
 
-                const select6 = await orm.where("testDataBase", "store3",'index1','<=',dataList[n5].key1);
+                const select6 = await orm.where("testDataBase", "store3",'index1','<=',dataList[n5].key1).all();
                 expect(select6.length === dataList.filter(it=>it.key1 <= dataList[n5].key1).length).toBeTruthy();
 
                 await new Promise((r) => setTimeout(r, 100));
 
-                const select7 = await orm.where("testDataBase", "store3",'index1','between', [ n1 , n3 ]);
+                const select7 = await orm.where("testDataBase", "store3",'index1','between', [ n1 , n3 ]).all();
                 expect(select7.length === dataList.filter(it=>(it.key1 > n1 && it.key1 < n3)).length).toBeTruthy();
 
                 await new Promise((r) => setTimeout(r, 100));
 
-                const select8 = await orm.where("testDataBase", "store3",'index1','betweenInclude', [ n1 , n3 ]);
+                const select8 = await orm.where("testDataBase", "store3",'index1','betweenInclude', [ n1 , n3 ]).all();
                 expect(select8.length === dataList.filter(it=>(it.key1 >= n1 && it.key1 <= n3)).length).toBeTruthy();
 
                 await new Promise((r) => setTimeout(r, 100));
 
-                const select9 = await orm.where("testDataBase", "store3",'index6','like', searchText);
+                const select9 = await orm.where("testDataBase", "store3",'index6','like', searchText).all();
                 let regex1 = new RegExp(`^(.*){0,}${searchText}(.*){0,}$`, 'i');
                 expect(select9.length === dataList.filter(it=>(it.key6.match(regex1))).length).toBeTruthy();
 
 
-                const select10 = await orm.where("testDataBase", "store3",'index6','%like%', searchText);
+                const select10 = await orm.where("testDataBase", "store3",'index6','%like%', searchText).all();
                 let regex2 = new RegExp(`^(.*){0,}${searchText}(.*){0,}$`, 'i');
                 expect(select10.length === dataList.filter(it=>(it.key6.match(regex2))).length).toBeTruthy();
 
 
-                const select11 = await orm.where("testDataBase", "store3",'index6','%like', searchText);
+                const select11 = await orm.where("testDataBase", "store3",'index6','%like', searchText).all();
                 let regex3 = new RegExp(`^(.*){0,}${searchText}$`, 'i');
                 expect(select11.length === dataList.filter(it=>(it.key6.match(regex3))).length).toBeTruthy();
 
 
-                const select12 = await orm.where("testDataBase", "store3",'index6','like%', searchText);
+                const select12 = await orm.where("testDataBase", "store3",'index6','like%', searchText).all();
                 let regex4 = new RegExp(`^${searchText}(.*){0,}$`, 'i');
                 expect(select12.length === dataList.filter(it=>(it.key6.match(regex4))).length).toBeTruthy();
 
+                const select13 = await orm.where("testDataBase", "store3",'index6','match', `^${searchText}(.*){0,}$`).all();
+                let regex5 = new RegExp(`^${searchText}(.*){0,}$`, 'i');
+                expect(select13.length === dataList.filter(it=>(it.key6.match(regex5))).length).toBeTruthy();
 
-                const select13 = await orm.multiWhere("testDataBase", "store3",[
-                    {index:'index1', operator:'>', value:dataList[n3].key1},
-                    {index:'index1', operator:'<=', value:dataList[n5].key1},
-                    {index:'index6', operator:'like', value:searchText},
-                ]);
+                const select14 = await orm.where("testDataBase", "store3",'index6').all();
+                expect(select14.length === 0).toBeTruthy();
+
+                const select15 = await orm.where("testDataBase", "store3",'index1','>',dataList[n3].key1)
+                    .where('index1','<=',dataList[n5].key1)
+                    .where('index6','like',searchText).all();
+
                 const pk13_3 = select3.map(it=>it.__pk);
                 const pk13_6 = select6.map(it=>it.__pk);
                 const pk13_9 = select9.map(it=>it.__pk);
@@ -1071,20 +1205,20 @@ describe('store', () => {
                     .filter(it=>pk13_6.includes(it))
                     .filter(it=>pk13_9.includes(it));
 
-                expect(pk13_result.length === select13.length).toBeTruthy();
+                expect(pk13_result.length === select15.length).toBeTruthy();
 
 
-                const select14 = await orm.multiWhere("testDataBase", "store3",[
-                    {index:'index1', operator:'>', value:dataList[n3].key1},
-                    {index:'index1', operator:'<=', value:dataList[n5].key1},
-                    {index:'index6', operator:'like', value:searchText},
-                ],'or');
+                const select16 = await orm.where("testDataBase", "store3",'index1', '>', dataList[n3].key1)
+                    .where('index1', '<=', dataList[n5].key1)
+                    .where('index6', 'like', searchText)
+                    .all('or');
+
                 const pk14_3 = select3.map(it=>it.__pk);
                 const pk14_6 = select6.map(it=>it.__pk);
                 const pk14_9 = select9.map(it=>it.__pk);
                 const pk14_result = [...new Set([...pk14_3,...pk14_6,...pk14_9])];
 
-                expect(pk14_result.length === select14.length).toBeTruthy();
+                expect(pk14_result.length === select16.length).toBeTruthy();
 
 
                 await new Promise((r) => setTimeout(r, 100));
@@ -1135,71 +1269,71 @@ describe('store', () => {
                 const searchText = generateString(Math.ceil(4*Math.random()));
 
 
-                const select1 = await orm.testDataBase.store3.where('index1','=',dataList[n1].key1);
+                const select1 = await orm.testDataBase.store3.where('index1','=',dataList[n1].key1).all();
                 expect(select1.length === dataList.filter(it=>it.key1 === dataList[n1].key1).length).toBeTruthy();
 
                 await new Promise((r) => setTimeout(r, 100));
 
-                const select2 = await orm.testDataBase.store3.where('index5','=',[dataList[n2].key3,dataList[n2].key4]);
+                const select2 = await orm.testDataBase.store3.where('index5','=',[dataList[n2].key3,dataList[n2].key4]).all();
                 expect(select2.length === dataList.filter(it=>it.key3 === dataList[n2].key3 && it.key4 === dataList[n2].key4).length).toBeTruthy();
 
                 await new Promise((r) => setTimeout(r, 100));
 
-                const select3 = await orm.testDataBase.store3.where('index1','>',dataList[n3].key1);
+                const select3 = await orm.testDataBase.store3.where('index1','>',dataList[n3].key1).all();
                 expect(select3.length === dataList.filter(it=>it.key1 > dataList[n3].key1).length).toBeTruthy();
 
                 await new Promise((r) => setTimeout(r, 100));
 
-                const select4 = await orm.testDataBase.store3.where('index1','>=',dataList[n4].key1);
+                const select4 = await orm.testDataBase.store3.where('index1','>=',dataList[n4].key1).all();
                 expect(select4.length === dataList.filter(it=>it.key1 >= dataList[n4].key1).length).toBeTruthy();
 
                 await new Promise((r) => setTimeout(r, 100));
 
-                const select5 = await orm.testDataBase.store3.where('index1','<',dataList[n5].key1);
+                const select5 = await orm.testDataBase.store3.where('index1','<',dataList[n5].key1).all();
                 expect(select5.length === dataList.filter(it=>it.key1 < dataList[n5].key1).length).toBeTruthy();
 
                 await new Promise((r) => setTimeout(r, 100));
 
-                const select6 = await orm.testDataBase.store3.where('index1','<=',dataList[n5].key1);
+                const select6 = await orm.testDataBase.store3.where('index1','<=',dataList[n5].key1).all();
                 expect(select6.length === dataList.filter(it=>it.key1 <= dataList[n5].key1).length).toBeTruthy();
 
                 await new Promise((r) => setTimeout(r, 100));
 
-                const select7 = await orm.testDataBase.store3.where('index1','between', [ n1 , n3 ]);
+                const select7 = await orm.testDataBase.store3.where('index1','between', [ n1 , n3 ]).all();
                 expect(select7.length === dataList.filter(it=>(it.key1 > n1 && it.key1 < n3)).length).toBeTruthy();
 
                 await new Promise((r) => setTimeout(r, 100));
 
-                const select8 = await orm.testDataBase.store3.where('index1','betweenInclude', [ n1 , n3 ]);
+                const select8 = await orm.testDataBase.store3.where('index1','betweenInclude', [ n1 , n3 ]).all();
                 expect(select8.length === dataList.filter(it=>(it.key1 >= n1 && it.key1 <= n3)).length).toBeTruthy();
 
                 await new Promise((r) => setTimeout(r, 100));
 
-                const select9 = await orm.testDataBase.store3.where('index6','like', searchText);
+                const select9 = await orm.testDataBase.store3.where('index6','like', searchText).all();
                 let regex1 = new RegExp(`^(.*){0,}${searchText}(.*){0,}$`, 'i');
                 expect(select9.length === dataList.filter(it=>(it.key6.match(regex1))).length).toBeTruthy();
 
 
-                const select10 = await orm.testDataBase.store3.where('index6','%like%', searchText);
+                const select10 = await orm.testDataBase.store3.where('index6','%like%', searchText).all();
                 let regex2 = new RegExp(`^(.*){0,}${searchText}(.*){0,}$`, 'i');
                 expect(select10.length === dataList.filter(it=>(it.key6.match(regex2))).length).toBeTruthy();
 
 
-                const select11 = await orm.testDataBase.store3.where('index6','%like', searchText);
+                const select11 = await orm.testDataBase.store3.where('index6','%like', searchText).all();
                 let regex3 = new RegExp(`^(.*){0,}${searchText}$`, 'i');
                 expect(select11.length === dataList.filter(it=>(it.key6.match(regex3))).length).toBeTruthy();
 
 
-                const select12 = await orm.testDataBase.store3.where('index6','like%', searchText);
+                const select12 = await orm.testDataBase.store3.where('index6','like%', searchText).all();
                 let regex4 = new RegExp(`^${searchText}(.*){0,}$`, 'i');
                 expect(select12.length === dataList.filter(it=>(it.key6.match(regex4))).length).toBeTruthy();
 
 
-                const select13 = await orm.testDataBase.store3.multiWhere([
-                    {index:'index1', operator:'>', value:dataList[n3].key1},
-                    {index:'index1', operator:'<=', value:dataList[n5].key1},
-                    {index:'index6', operator:'like', value:searchText},
-                ]);
+                const select13 = await orm.testDataBase.store3
+                    .where('index1', '>', dataList[n3].key1)
+                    .where('index1', '<=', dataList[n5].key1)
+                    .where('index6', 'like', searchText).all();
+
                 const pk13_3 = select3.map(it=>it.__pk);
                 const pk13_6 = select6.map(it=>it.__pk);
                 const pk13_9 = select9.map(it=>it.__pk);
@@ -1210,11 +1344,11 @@ describe('store', () => {
                 expect(pk13_result.length === select13.length).toBeTruthy();
 
 
-                const select14 = await orm.testDataBase.store3.multiWhere([
-                    {index:'index1', operator:'>', value:dataList[n3].key1},
-                    {index:'index1', operator:'<=', value:dataList[n5].key1},
-                    {index:'index6', operator:'like', value:searchText},
-                ],'or');
+                const select14 = await orm.testDataBase.store3
+                    .where('index1','>',dataList[n3].key1)
+                    .where('index1','<=',dataList[n5].key1)
+                    .where('index6','like',searchText).all('or');
+
                 const pk14_3 = select3.map(it=>it.__pk);
                 const pk14_6 = select6.map(it=>it.__pk);
                 const pk14_9 = select9.map(it=>it.__pk);
