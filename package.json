@@ -5,15 +5,15 @@
   "main": "dist/index_bundle.js",
   "scripts": {
     "test": "jest",
-    "build": "webpack"
+    "dev": "SET NODE_ENV=development&& webpack",
+    "build": "SET NODE_ENV=production&& webpack"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/AminAdinehAhari/index-db-orm.git"
   },
   "keywords": [
-    "index",
-    "db",
+    "index db",
     "orm"
   ],
   "author": "a.adine.a@gmail.com",
@@ -33,6 +33,7 @@
     "@babel/preset-env": "^7.11.0",
     "babel-loader": "^8.1.0",
     "jest": "^27.5.1",
+    "uglifyjs-webpack-plugin": "^2.2.0",
     "webpack": "^4.44.1",
     "webpack-cli": "^3.3.12"
   }
