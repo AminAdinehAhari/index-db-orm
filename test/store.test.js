@@ -1367,6 +1367,229 @@ describe('store', () => {
     });
 
 
+    //--------------------------------------------------
+    // event -------------------------------------------
+    //--------------------------------------------------
+
+    test('onInsert , onUpdate , onDelete', async () => {
+
+        let insertCount = 0;
+        let updateCount = 0;
+        let deleteCount = 0;
+
+        //---------------------------
+
+        let insertEvent1 = orm.onInsert("testDataBase", "store2",function(){
+            insertCount += 1;
+        });
+
+        let insertEvent2 = orm.onInsert("testDataBase", "store2",function(){
+            insertCount += 1;
+        });
+
+
+        let updateEvent1 = orm.onUpdate("testDataBase", "store2",function(){
+            updateCount += 1;
+        });
+
+        let updateEvent2 = orm.onUpdate("testDataBase", "store2",function(){
+            updateCount += 1;
+        });
+
+        let deleteEvent1 = orm.onDelete("testDataBase", "store2",function(){
+            deleteCount += 1;
+        });
+
+        let deleteEvent2 = orm.onDelete("testDataBase", "store2",function(){
+            deleteCount += 1;
+        });
+
+        //--------------------------
+
+        let resInsert1 = await orm.insert("testDataBase", "store2", {
+            key1: "abc",
+            key2: 0,
+            key3: 100000,
+            key4: "cde",
+        });
+
+        expect(insertCount === 2).toBeTruthy();
+
+        let resUpdate1 = await orm.update("testDataBase", "store2", {
+            ...resInsert1,
+            key1: "abc777777777",
+        });
+
+        expect(updateCount === 2).toBeTruthy();
+
+        let resDelete1 = await orm.delete("testDataBase", "store2",resInsert1.__pk);
+
+        expect(deleteCount === 2).toBeTruthy();
+
+        //---------------------------------------------
+
+        orm.unbindInsert("testDataBase", "store2", insertEvent1);
+
+        let resInsert2 = await orm.insert("testDataBase", "store2", {
+            key1: "abc3",
+            key2: 234,
+            key3: 1000,
+            key4: "cde2",
+        });
+
+
+        orm.unbindUpdate("testDataBase", "store2", updateEvent1);
+
+        let resUpdate2 = await orm.update("testDataBase", "store2", {
+            ...resInsert2,
+            key1: "abc345",
+        });
+
+
+        orm.unbindDelete("testDataBase", "store2", deleteEvent1);
+
+
+        let resDelete2 = await orm.delete("testDataBase", "store2", resInsert2.__pk);
+
+        expect(insertCount === 3).toBeTruthy();
+        expect(updateCount === 3).toBeTruthy();
+        expect(deleteCount === 3).toBeTruthy();
+
+        //---------------------------------------------
+
+        orm.unbindAllInsert("testDataBase", "store2");
+        orm.unbindAllUpdate("testDataBase", "store2");
+        orm.unbindAllDelete("testDataBase", "store2");
+
+        let resInsert3 = await orm.insert("testDataBase", "store2", {
+            key1: "ab2c233",
+            key2: 2334,
+            key3: 10040,
+            key4: "cde43242",
+        });
+
+        let resUpdate3 = await orm.update("testDataBase", "store2", {
+            ...resInsert3,
+            key1: "ab2c56",
+        });
+
+        let resDelete3 = await orm.delete("testDataBase", "store2", resInsert3.__pk);
+
+        expect(insertCount === 3).toBeTruthy();
+        expect(updateCount === 3).toBeTruthy();
+        expect(deleteCount === 3).toBeTruthy();
+
+    });
+
+    test('direct onInsert , onUpdate , onDelete', async () => {
+
+        let insertCount = 0;
+        let updateCount = 0;
+        let deleteCount = 0;
+
+        //---------------------------
+
+        let insertEvent1 = orm.testDataBase.store2.onInsert(function(){
+            insertCount += 1;
+        });
+
+        let insertEvent2 = orm.testDataBase.store2.onInsert(function(){
+            insertCount += 1;
+        });
+
+
+        let updateEvent1 = orm.testDataBase.store2.onUpdate(function(){
+            updateCount += 1;
+        });
+
+        let updateEvent2 = orm.testDataBase.store2.onUpdate(function(){
+            updateCount += 1;
+        });
+
+        let deleteEvent1 = orm.testDataBase.store2.onDelete(function(){
+            deleteCount += 1;
+        });
+
+        let deleteEvent2 = orm.testDataBase.store2.onDelete(function(){
+            deleteCount += 1;
+        });
+
+        //--------------------------
+
+        let resInsert1 = await orm.insert("testDataBase", "store2", {
+            key1: "abc",
+            key2: 0,
+            key3: 100000,
+            key4: "cde",
+        });
+
+        expect(insertCount === 2).toBeTruthy();
+
+        let resUpdate1 = await orm.update("testDataBase", "store2", {
+            ...resInsert1,
+            key1: "abc777777777",
+        });
+
+        expect(updateCount === 2).toBeTruthy();
+
+        let resDelete1 = await orm.delete("testDataBase", "store2",resInsert1.__pk);
+
+        expect(deleteCount === 2).toBeTruthy();
+
+        //---------------------------------------------
+
+        orm.testDataBase.store2.unbindInsert(insertEvent1)
+
+        let resInsert2 = await orm.insert("testDataBase", "store2", {
+            key1: "abc3",
+            key2: 234,
+            key3: 1000,
+            key4: "cde2",
+        });
+
+
+        orm.testDataBase.store2.unbindUpdate(updateEvent1);
+
+        let resUpdate2 = await orm.update("testDataBase", "store2", {
+            ...resInsert2,
+            key1: "abc345",
+        });
+
+
+        orm.testDataBase.store2.unbindDelete(deleteEvent1);
+
+
+        let resDelete2 = await orm.delete("testDataBase", "store2", resInsert2.__pk);
+
+        expect(insertCount === 3).toBeTruthy();
+        expect(updateCount === 3).toBeTruthy();
+        expect(deleteCount === 3).toBeTruthy();
+
+        // //---------------------------------------------
+
+        orm.testDataBase.store2.unbindAllInsert();
+        orm.testDataBase.store2.unbindAllUpdate();
+        orm.testDataBase.store2.unbindAllDelete();
+
+        let resInsert3 = await orm.insert("testDataBase", "store2", {
+            key1: "ab2c233",
+            key2: 2334,
+            key3: 10040,
+            key4: "cde43242",
+        });
+
+        let resUpdate3 = await orm.update("testDataBase", "store2", {
+            ...resInsert3,
+            key1: "ab2c56",
+        });
+
+        let resDelete3 = await orm.delete("testDataBase", "store2", resInsert3.__pk);
+
+        expect(insertCount === 3).toBeTruthy();
+        expect(updateCount === 3).toBeTruthy();
+        expect(deleteCount === 3).toBeTruthy();
+
+    });
 
 
 
