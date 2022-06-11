@@ -1,5 +1,5 @@
 import {describe, expect} from "@jest/globals";
-import {orm as ormClass} from "../src/index"
+import ormClass from "../src/index"
 // const ormClass = require('../dist/ormIndexDB');
 
 

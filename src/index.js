@@ -1,5 +1,3 @@
 import orm from "./modules/ormIndexDb";
 
-export {
-    orm
-}
+export default orm;

@@ -1,5 +1,5 @@
 import {afterEach, describe, expect, jest} from "@jest/globals";
-import {orm as ormClass} from "../src/index";
+import ormClass from "../src/index";
 
 
 const db_schema_1 = {

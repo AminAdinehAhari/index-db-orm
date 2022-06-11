@@ -235,16 +235,6 @@ class OrmIndexDb {
         return this;
     }
 
-    /**
-     *
-     * @param {string} dbName
-     * @param {function} event
-     * @returns {OrmIndexDb}
-     */
-    onRebuildDB(dbName, event) {
-        this.__schema[dbName].onRebuild = event;
-        return this;
-    }
 
     // Private ----------------------------------
 
@@ -375,6 +365,10 @@ class OrmIndexDb {
                 name: storeSchema.name,
                 keyPath: keyPath,
                 keyPathAuto: !!!storeSchema.keyPath,
+                onInsert: [],
+                onUpdate: [],
+                onDelete: [],
+                onClear: [],
                 indexes: !!storeSchema.indexes && Array.isArray(storeSchema.indexes) ?
                     this._createIndexesArray(storeSchema.indexes, keyPath) :
                     this._createIndexesArray([], keyPath),
@@ -549,6 +543,9 @@ class OrmIndexDb {
                 }
 
                 const newData = this._insertConvertDataEntry(dbName, storeName, data);
+                this._runInsertEvent(dbName, storeName, newData);
+
+
                 let transaction = this._transactionReadWrite(dbName, storeName).objectStore(storeName);
 
                 let request = transaction?.add(newData);
@@ -599,10 +596,11 @@ class OrmIndexDb {
                 let request = transaction?.get(_pk);
                 let ths = this;
 
-
                 request.onsuccess = event => {
 
-                    // const dt = event.target.result;
+                    const currentData = event.target.result;
+                    this._runUpdateEvent(dbName, storeName, newData, currentData);
+
                     let requestUpdate = transaction?.put(newData);
 
                     requestUpdate.onerror = ev => {
@@ -645,13 +643,14 @@ class OrmIndexDb {
      * @returns {Promise<Error|boolean>}
      */
     delete(dbName, storeName, _pk) {
-
         return new Promise(async (resolve, reject) => {
             try {
 
                 if (!this._checkActiveDB(dbName)) {
                     await this._openDB(dbName);
                 }
+
+                await this._runDeleteEvent(dbName, storeName, _pk)
 
                 let transaction = this._transactionReadWrite(dbName, storeName).objectStore(storeName);
                 let request = transaction?.delete(_pk);
@@ -670,8 +669,6 @@ class OrmIndexDb {
                 reject(e);
             }
         })
-
-
     }
 
     /**
@@ -763,7 +760,7 @@ class OrmIndexDb {
      * @param {object} query
      * @returns {Promise<number>}
      */
-    count(dbName, storeName,query=null) {
+    count(dbName, storeName, query = null) {
         return new Promise(async (resolve, reject) => {
             try {
 
@@ -791,7 +788,6 @@ class OrmIndexDb {
         })
     }
 
-
     /**
      * paginate
      * @param {string} dbName
@@ -800,7 +796,7 @@ class OrmIndexDb {
      * @param {?number} total
      * @returns {Promise<array>}
      */
-    paginate(dbName, storeName, page=1, total = 20) {
+    paginate(dbName, storeName, page = 1, total = 20) {
         return new Promise(async (resolve, reject) => {
             try {
                 if (!this._checkActiveDB(dbName)) {
@@ -810,20 +806,20 @@ class OrmIndexDb {
                 let transaction = this._transactionReadOnly(dbName, storeName).objectStore(storeName);
                 const request = transaction.openCursor();
                 const result = [];
-                const start = (page-1)*total;
+                const start = (page - 1) * total;
                 let hasSkipped = false;
 
                 request.onsuccess = function (event) {
                     const cursor = event.target.result;
-                    
-                    if(!hasSkipped && start > 0) {
+
+                    if (!hasSkipped && start > 0) {
                         hasSkipped = true;
                         cursor.advance(start);
                         return;
                     }
-                    if(cursor) {
+                    if (cursor) {
                         result.push(cursor.value);
-                        if(result.length < total) {
+                        if (result.length < total) {
                             cursor.continue();
                         } else {
                             resolve(result);
@@ -843,7 +839,6 @@ class OrmIndexDb {
             }
         })
     }
-
 
     /**
      * where
@@ -1212,6 +1207,14 @@ class OrmIndexDb {
         return !!db
     }
 
+    /**
+     *
+     * @param {string} dbName
+     * @param {string} storeName
+     * @param {string} indexName
+     * @returns {Array}
+     * @private
+     */
     _getStoreIndexKeyPaths(dbName, storeName, indexName) {
         const indexesArray = this.__schema[dbName]?.stores[storeName]?.indexes;
 
@@ -1242,6 +1245,231 @@ class OrmIndexDb {
     //-------------------------------------------
     //-------------------------------------------
     //-------------------------------------------
+
+    // Events -----------------------------------
+    // Public -----------------------------------
+
+    /**
+     *
+     * @param {string} dbName
+     * @param {function} event
+     * @returns {OrmIndexDb}
+     */
+    onRebuildDB(dbName, event) {
+        this.__schema[dbName].onRebuild = event;
+        return this;
+    }
+
+    /**
+     * onInsert
+     * @param {string} dbName
+     * @param {string} storeName
+     * @param {function} event
+     */
+    onInsert(dbName, storeName, event) {
+        if (dbName in this.__schema && storeName in this.__schema[dbName].stores) {
+            let key = this._generatePkIndexValue();
+            this.__schema[dbName].stores[storeName].onInsert.push({
+                key: key,
+                event: event
+            });
+            return key;
+        }
+    }
+
+    /**
+     * onUpdate
+     * @param {string} dbName
+     * @param {string} storeName
+     * @param {function} event
+     */
+    onUpdate(dbName, storeName, event) {
+        if (dbName in this.__schema && storeName in this.__schema[dbName].stores) {
+            let key = this._generatePkIndexValue();
+            this.__schema[dbName].stores[storeName].onUpdate.push({
+                key: key,
+                event: event
+            });
+            return key;
+        }
+    }
+
+    /**
+     * onDelete
+     * @param {string} dbName
+     * @param {string} storeName
+     * @param {function} event
+     */
+    onDelete(dbName, storeName, event) {
+        if (dbName in this.__schema && storeName in this.__schema[dbName].stores) {
+            let key = this._generatePkIndexValue();
+            this.__schema[dbName].stores[storeName].onDelete.push({
+                key: key,
+                event: event
+            });
+            return key;
+        }
+    }
+
+    /**
+     * unbindInsert
+     * @param {string} dbName
+     * @param {string} storeName
+     * @param {string} key
+     * @returns {OrmIndexDb}
+     */
+    unbindInsert(dbName, storeName, key) {
+        if (dbName in this.__schema &&
+            storeName in this.__schema[dbName].stores &&
+            !!this.__schema[dbName].stores[storeName].onInsert
+        ) {
+            this.__schema[dbName].stores[storeName].onInsert = [
+                ...this.__schema[dbName].stores[storeName].onInsert.filter(it => it.key !== key)
+            ]
+        }
+        return this;
+    }
+
+    /**
+     * unbindUpdate
+     * @param {string} dbName
+     * @param {string} storeName
+     * @param {string} key
+     * @returns {OrmIndexDb}
+     */
+    unbindUpdate(dbName, storeName, key) {
+        if (dbName in this.__schema &&
+            storeName in this.__schema[dbName].stores &&
+            !!this.__schema[dbName].stores[storeName].onUpdate
+        ) {
+            this.__schema[dbName].stores[storeName].onUpdate = [
+                ...this.__schema[dbName].stores[storeName].onUpdate.filter(it => it.key !== key)
+            ]
+        }
+        return this;
+    }
+
+    /**
+     * unbindDelete
+     * @param {string} dbName
+     * @param {string} storeName
+     * @param {string} key
+     * @returns {OrmIndexDb}
+     */
+    unbindDelete(dbName, storeName, key) {
+        if (dbName in this.__schema &&
+            storeName in this.__schema[dbName].stores &&
+            !!this.__schema[dbName].stores[storeName].onDelete
+        ) {
+            this.__schema[dbName].stores[storeName].onDelete = [
+                ...this.__schema[dbName].stores[storeName].onDelete.filter(it => it.key !== key)
+            ]
+        }
+        return this;
+    }
+
+
+    /**
+     * unbindAllInsert
+     * @param dbName
+     * @param storeName
+     * @returns {OrmIndexDb}
+     */
+    unbindAllInsert(dbName, storeName){
+        if (dbName in this.__schema && storeName in this.__schema[dbName].stores) {
+            this.__schema[dbName].stores[storeName].onInsert = [];
+        }
+        return this;
+    }
+
+    /**
+     * unbindAllUpdate
+     * @param dbName
+     * @param storeName
+     * @returns {OrmIndexDb}
+     */
+    unbindAllUpdate(dbName, storeName){
+        if (dbName in this.__schema && storeName in this.__schema[dbName].stores) {
+            this.__schema[dbName].stores[storeName].onUpdate = [];
+        }
+        return this;
+    }
+
+    /**
+     * unbindAllDelete
+     * @param dbName
+     * @param storeName
+     * @returns {OrmIndexDb}
+     */
+    unbindAllDelete(dbName, storeName){
+        if (dbName in this.__schema && storeName in this.__schema[dbName].stores) {
+            this.__schema[dbName].stores[storeName].onDelete = [];
+        }
+        return this;
+    }
+
+
+    // Private ----------------------------------
+
+    /**
+     * _runInsertEvent
+     * @param {string} dbName
+     * @param {string} storeName
+     * @param {Object} data
+     * @private
+     */
+    _runInsertEvent(dbName, storeName, data) {
+        if (dbName in this.__schema &&
+            storeName in this.__schema[dbName].stores &&
+            !!this.__schema[dbName].stores[storeName].onInsert
+        ) {
+            this.__schema[dbName].stores[storeName].onInsert.map(it => {
+                it.event(data, it.key)
+            })
+        }
+    }
+
+    /**
+     * _runUpdateEvent
+     * @param {string} dbName
+     * @param {string} storeName
+     * @param {Object} newData
+     * @param {Object} lastData
+     * @private
+     */
+    _runUpdateEvent(dbName, storeName, newData, lastData) {
+        if (dbName in this.__schema &&
+            storeName in this.__schema[dbName].stores &&
+            !!this.__schema[dbName].stores[storeName].onUpdate
+        ) {
+            this.__schema[dbName].stores[storeName].onUpdate.map(it => {
+                it.event(newData, lastData, it.key)
+            })
+        }
+    }
+
+    /**
+     * _runUpdateEvent
+     * @param {string} dbName
+     * @param {string} storeName
+     * @param {string|number} pk
+     * @private
+     */
+    async _runDeleteEvent(dbName, storeName, pk) {
+        if (dbName in this.__schema &&
+            storeName in this.__schema[dbName].stores &&
+            !!this.__schema[dbName].stores[storeName].onUpdate
+        ) {
+            try {
+                let data = await this.find(dbName, storeName, pk);
+                this.__schema[dbName].stores[storeName].onDelete.map(it => {
+                    it.event(data, it.key)
+                })
+            } catch (e) {
+            }
+        }
+    }
+
 
     // ORM Operation Functions ------------------
     // Public -----------------------------------
@@ -1436,10 +1664,10 @@ class OrmIndexDb {
             all: function () {
                 return ths.all(dbName, storeName)
             },
-            count: function (query=null) {
+            count: function (query = null) {
                 return ths.count(dbName, storeName, query)
             },
-            paginate: function (page=1,perLength = 20) {
+            paginate: function (page = 1, perLength = 20) {
                 return ths.paginate(dbName, storeName, page, perLength)
             },
             where: function (conditionIndex, conditionOperator, conditionValues) {
@@ -1447,6 +1675,33 @@ class OrmIndexDb {
             },
             clear: function () {
                 return ths.clearStore(dbName, storeName)
+            },
+            onInsert: function (event) {
+                return ths.onInsert(dbName, storeName, event)
+            },
+            onUpdate: function (event) {
+                return ths.onUpdate(dbName, storeName, event)
+            },
+            onDelete: function (event) {
+                return ths.onDelete(dbName, storeName, event)
+            },
+            unbindInsert: function (key) {
+                return ths.unbindInsert(dbName, storeName, key)
+            },
+            unbindUpdate: function (key) {
+                return ths.unbindUpdate(dbName, storeName, key)
+            },
+            unbindDelete: function (key) {
+                return ths.unbindDelete(dbName, storeName, key)
+            },
+            unbindAllInsert: function () {
+                return ths.unbindAllInsert(dbName, storeName)
+            },
+            unbindAllUpdate: function () {
+                return ths.unbindAllUpdate(dbName, storeName)
+            },
+            unbindAllDelete: function () {
+                return ths.unbindAllDelete(dbName, storeName)
             },
         }
     }
