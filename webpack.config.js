@@ -1,10 +1,15 @@
 const path = require("path");
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+
+const mode = process.env.NODE_ENV || 'development';
+
+
 
 module.exports = {
     entry: path.resolve(__dirname, "src/index.js"),
     output: {
         path: path.resolve(__dirname, "dist"),
-        filename: "ormIndexDB.js",
+        filename: mode === 'production' ?  "ormIndexDB.min.js" : "ormIndexDB.js",
         library: "ormIndexDB",
         libraryTarget: "umd",
     },
@@ -24,7 +29,10 @@ module.exports = {
                     }
                 }
             },
-        ]
+        ],
     },
-    mode: "development",
-}
+    optimization: {
+        minimizer: [new UglifyJsPlugin()],
+    },
+    mode: mode,
+};
