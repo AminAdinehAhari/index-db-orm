@@ -368,7 +368,6 @@ class OrmIndexDb {
                 onInsert: [],
                 onUpdate: [],
                 onDelete: [],
-                onClear: [],
                 indexes: !!storeSchema.indexes && Array.isArray(storeSchema.indexes) ?
                     this._createIndexesArray(storeSchema.indexes, keyPath) :
                     this._createIndexesArray([], keyPath),
