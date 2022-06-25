@@ -14,10 +14,12 @@
   },
   "keywords": [
     "index db",
-    "orm"
+    "orm",
+    "js",
+    "promise"
   ],
-  "author": "a.adine.a@gmail.com",
-  "license": "ISC",
+  "author": "Amin Adineh Ahari",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/AminAdinehAhari/index-db-orm/issues"
   },
@@ -36,5 +38,8 @@
     "uglifyjs-webpack-plugin": "^2.2.0",
     "webpack": "^4.44.1",
     "webpack-cli": "^3.3.12"
-  }
+  },
+  "contributors": [
+    "Amin Adineh Ahari (https://github.com/AminAdinehAhari)"
+  ]
 }
