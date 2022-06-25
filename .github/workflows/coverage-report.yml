@@ -14,3 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - uses: ArtiomTr/jest-coverage-report-action@v2
+    with:
+      github-token: ${{ secrets.SECRET_TOKEN }}
+      coverage-file: ./coverage/report.json
+      base-coverage-file: ./coverage/master/report.json
