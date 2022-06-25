@@ -25,5 +25,8 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Run the build
+        run: npm build
+
       - name: Run the tests
-        run: npm test --forceExit --ci --json --coverage --testLocationInResults --outputFile=report.json
+        run: npm test --ci --json --coverage
