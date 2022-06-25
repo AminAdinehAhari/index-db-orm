@@ -372,7 +372,7 @@ also you can use `onRebuild` as
 
 ```js
 orm.onRebuildDB("dataBaseName", function () {
-  console.log("pandosLogs rebuild )))))))))))))))))))))");
+  console.log("rebuild event )))))))))))))))))))))");
 })
 ```
 
