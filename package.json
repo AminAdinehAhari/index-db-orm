@@ -4,7 +4,7 @@
   "description": "a library for easy connection and work with client-side data base",
   "main": "dist/index_bundle.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest --forceExit",
     "dev": "SET NODE_ENV=development&& webpack",
     "build": "SET NODE_ENV=production&& webpack"
   },
