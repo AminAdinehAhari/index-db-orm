@@ -132,14 +132,14 @@ class OrmIndexDb {
 
     /**
      * removeDataBase
-     * @param {string} dataBaseName
+     * @param {string} name
      * @returns {Promise<OrmIndexDb|error>}
      */
-    async removeDataBase(dataBaseName) {
+    async removeDataBase(name) {
         try {
-            await this.IDB.deleteDatabase(dataBaseName);
-            this._removeDataBaseOfSchema(dataBaseName);
-            this._removeDataBaseOfClass(dataBaseName);
+            await this.IDB.deleteDatabase(name);
+            this._removeDataBaseOfSchema(name);
+            this._removeDataBaseOfClass(name);
             return this;
         } catch (error) {
             console.log(error);
@@ -321,10 +321,9 @@ class OrmIndexDb {
      * @param {string} storeName
      * @returns {Promise<boolean|*>}
      */
-    async clearStore(dbName, storeName) {
+    clearStore(dbName, storeName) {
         return new Promise(async (resolve, reject) => {
             try {
-
                 if (!this._checkActiveDB(dbName)) {
                     await this._openDB(dbName);
                 }
@@ -333,14 +332,13 @@ class OrmIndexDb {
                 let request = transaction?.clear();
 
                 request.onsuccess = event => {
-                    resolve(true)
+                    resolve(this)
                 };
 
                 request.onerror = event => {
                     let req = event.target;
                     reject(!!req.error ? req.error : new Error(textMessage.ErrorSystem));
                 };
-
 
             } catch (e) {
                 reject(e);
@@ -674,7 +672,7 @@ class OrmIndexDb {
      * find
      * @param {string} dbName
      * @param {string} storeName
-     * @param {string|number} value
+     * @param {string|number|array} value
      * @param {string} searchPk
      * @returns {Promise<object>}
      */
