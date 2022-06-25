@@ -26,4 +26,4 @@ jobs:
         run: npm install
 
       - name: Run the tests
-        run: npm test --forceExit --ci --json --coverage --testLocationInResults --outputFile=report.json
+        run: npm test --forceExit --detectOpenHandles --ci --json --coverage --testLocationInResults --outputFile=report.json
