@@ -1,4 +1,4 @@
-import {afterEach, describe, expect, jest} from "@jest/globals";
+import {afterAll, afterEach, describe, expect, jest} from "@jest/globals";
 import ormClass from "../src/index";
 import configs from "../src/modules/helper/configs";
 
@@ -55,6 +55,13 @@ function generateString(length) {
 const orm = new ormClass('test');
 
 let totalResult = {};
+
+
+afterAll((done) => {
+    console.log('store')
+    done();
+});
+
 
 describe('store', () => {
 
