@@ -1,32 +1,17 @@
-name: Coverage report
 on:
   pull_request:
+    types: [opened]
     branches:
       - master
-      - main
 jobs:
-  build:
-
+  coverage:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [12.x]
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Set up Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+      - name: OpenCover Badge Generator
+        uses: danpetitt/open-cover-badge-generator-action@v1.0.9
         with:
-          node-version: ${{ matrix.node-version }}
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Run the build
-        run: npm run build
-
-      - name: Run the tests
-        run: npm test --ci --json --coverage
+          path-to-opencover-xml: ./test/opencover.xml
+          path-to-badges: ./
+          minimum-coverage: 75
+          commit-badges: false
+          repo-token: ${{ secrets.CI_TOKEN }}
