@@ -1,5 +1,6 @@
 import {describe, expect} from "@jest/globals";
 import ormClass from "../src/index"
+import textMessage from "../src/modules/helper/textMessage";
 // const ormClass = require('../dist/ormIndexDB');
 
 
@@ -23,6 +24,17 @@ describe('orm class ', () => {
             expect(true).toBeTruthy();
         }
     });
+
+    test('not support',()=>{
+        try {
+            const orm = new ormClass();
+            expect(false).toBeTruthy();
+        }catch (e) {
+            console.log(e.message)
+            expect(e.toString() === textMessage.ErrorBrowserSupport).toBeTruthy();
+        }
+    });
+
 
 
 

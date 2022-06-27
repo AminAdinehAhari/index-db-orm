@@ -56,13 +56,6 @@ const orm = new ormClass('test');
 
 let totalResult = {};
 
-
-afterAll((done) => {
-    console.log('store')
-    done();
-});
-
-
 describe('store', () => {
 
     test('add database and stores', async () => {
