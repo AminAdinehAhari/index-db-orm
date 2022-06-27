@@ -19,12 +19,6 @@ const db_schema_1 = {
 
 const orm = new ormClass('test');
 
-
-afterAll((done) => {
-    console.log('database')
-    done();
-});
-
 describe('database', () => {
 
     test('add database , and check onRebuildDB', async () => {
