@@ -1594,10 +1594,14 @@ describe('store', () => {
 
 
 
+
+
+    afterAll((done) => {
+        done();
+    });
+
+
 });
 
 
-afterAll((done) => {
-    done();
-    process.exit('ERROR_CODE')
-});
+
