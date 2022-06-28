@@ -1597,12 +1597,8 @@ describe('store', () => {
 });
 
 
-afterAll(() => {
-    console.log("after all");
-
-    setTimeout(()=>{
-        console.log("after all 2");
-        process.exit();
-    },1000);
+afterAll((done) => {
+    done();
+    // process.exit('ERROR_CODE')
 
 });
