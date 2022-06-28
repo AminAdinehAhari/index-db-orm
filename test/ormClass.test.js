@@ -30,7 +30,6 @@ describe('orm class ', () => {
             const orm = new ormClass();
             expect(false).toBeTruthy();
         }catch (e) {
-            console.log(e.message)
             expect(e.toString() === textMessage.ErrorBrowserSupport).toBeTruthy();
         }
     });
