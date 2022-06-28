@@ -52,7 +52,7 @@ function generateString(length) {
 //--------------------------------------
 
 
-const orm = new ormClass('test');
+let orm = new ormClass('test');
 
 let totalResult = {};
 
@@ -1594,10 +1594,9 @@ describe('store', () => {
 
 
 
-
-
     afterAll((done) => {
-        console.log("****** done *************")
+        console.log("d")
+        orm = null;
         done();
     });
 
