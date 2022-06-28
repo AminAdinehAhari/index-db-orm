@@ -1599,6 +1599,5 @@ describe('store', () => {
 
 afterAll((done) => {
     done();
-    // process.exit('ERROR_CODE')
-
+    process.exit('ERROR_CODE')
 });
