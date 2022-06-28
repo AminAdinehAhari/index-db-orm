@@ -1598,7 +1598,9 @@ describe('store', () => {
 
 
 afterAll(() => {
+
     console.log("after all");
+
 
     setTimeout(()=>{
         console.log("after all 2");
