@@ -1597,6 +1597,7 @@ describe('store', () => {
 
 
     afterAll((done) => {
+        console.log("****** done *************")
         done();
     });
 
