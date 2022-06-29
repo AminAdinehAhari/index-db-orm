@@ -226,6 +226,15 @@ class OrmIndexDb {
     }
 
 
+
+    async allDbClose(){
+        for (let i in this.__schema){
+            await this._closeDB(i)
+        }
+        return this;
+    }
+
+
     // Private ----------------------------------
 
     /**

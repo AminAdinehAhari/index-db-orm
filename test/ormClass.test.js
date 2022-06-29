@@ -1,4 +1,4 @@
-import {describe, expect} from "@jest/globals";
+import {afterAll, describe, expect} from "@jest/globals";
 import ormClass from "../src/index"
 import textMessage from "../src/modules/helper/textMessage";
 // const ormClass = require('../dist/ormIndexDB');
@@ -11,6 +11,7 @@ describe('orm class ', () => {
         try {
             const orm = new ormClass('test');
             expect(true).toBeTruthy();
+            orm.allDbClose();
         }catch (e) {
             expect(false).toBeTruthy();
         }
@@ -20,6 +21,7 @@ describe('orm class ', () => {
         try {
             const orm = new ormClass();
             expect(false).toBeTruthy();
+            orm.allDbClose();
         }catch (e) {
             expect(true).toBeTruthy();
         }
@@ -29,6 +31,7 @@ describe('orm class ', () => {
         try {
             const orm = new ormClass();
             expect(false).toBeTruthy();
+            orm.allDbClose();
         }catch (e) {
             expect(e.toString() === textMessage.ErrorBrowserSupport).toBeTruthy();
         }
@@ -37,4 +40,9 @@ describe('orm class ', () => {
 
 
 
+});
+
+
+afterAll((done) => {
+    done();
 });
