@@ -26,4 +26,4 @@ jobs:
         run: npm install
 
       - name: Run the tests
-        run: npm test --forceExit and --detectOpenHandles
+        run: npm test
