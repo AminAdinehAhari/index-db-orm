@@ -1592,16 +1592,12 @@ describe('store', () => {
     });
 
 
-
-
-    afterAll((done) => {
-        console.log("d")
-        orm = null;
-        done();
-    });
-
-
 });
 
 
+
+afterAll((done) => {
+    orm.allDbClose().then((res)=>{});
+    done();
+});
 

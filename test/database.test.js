@@ -88,3 +88,10 @@ describe('database', () => {
 
 
 });
+
+
+
+afterAll((done) => {
+    orm.allDbClose().then((res)=>{});
+    done();
+});
