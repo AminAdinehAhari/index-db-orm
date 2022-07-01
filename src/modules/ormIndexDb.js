@@ -127,12 +127,20 @@ class OrmIndexDb {
      */
     async removeDataBase(name) {
         try {
-            await this.IDB.deleteDatabase(name);
+            await this._closeDB(name);
+        }catch (e) {}
+
+        try {
+            await this.IDB?.deleteDatabase(name);
+        } catch (error) {
+            // return error;
+        }
+
+        try {
             this._removeDataBaseOfSchema(name);
             this._removeDataBaseOfClass(name);
             return this;
-        } catch (error) {
-            console.log(error);
+        }catch (e) {
             return error;
         }
     }
