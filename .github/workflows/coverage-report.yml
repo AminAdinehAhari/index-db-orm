@@ -18,13 +18,17 @@ jobs:
       - name: Extract branch name
           if: github.event_name != 'pull_request'
           shell: bash
-          run: echo "::set-env name=$EXTRA_BRANCH_NAME::$(echo ${GITHUB_REF#refs/heads/})"
+          run: echo "::set-env name=BRANCH_NAME::$(echo ${GITHUB_REF#refs/heads/})"
           id: extract_branch
+
+      # extract branch name on pull request
+      - name: Print branch name
+        if: github.event_name == 'pull_request'
+        run: echo "::set-env name=BRANCH_NAME::$(echo ${GITHUB_HEAD_REF})"
 
       # print branch name
       - name: Get branch name
-        run: echo 'The branch name is' $EXTRA_BRANCH_NAME
-
+        run: echo 'The branch name is' $BRANCH_NAME
 
       - name: Checkout repository
         uses: actions/checkout@v2
