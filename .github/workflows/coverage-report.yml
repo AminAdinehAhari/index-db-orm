@@ -35,7 +35,7 @@ jobs:
         run: npm install
 
       - name: Run the Build
-        run: npm build-github
+        run: npm run build
 
       - name: Run the tests
         run: npm test
