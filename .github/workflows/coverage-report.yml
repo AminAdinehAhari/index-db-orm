@@ -16,22 +16,8 @@ jobs:
 
     steps:
 
-
-      - name: Extract branch name
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        id: extract_branch
-
-      # print branch name
-      - name: Get branch name
-        run: echo 'The branch name is' ${{ steps.extract_branch.outputs.branch }}
-
       - name: Checkout repository
         uses: actions/checkout@v2
-
-      # print branch name
-      - name: Get branch name ref
-        run: echo running on branch ${{ github.ref }}
 
       - name: Get branch name head_ref
         run: echo running on branch ${{ github.head_ref }}
@@ -78,7 +64,7 @@ jobs:
           # var PATHS = REF.split('/');
           IFS='/' read -ra PATHS <<< "$REF"
           # var BRANCH_NAME = PATHS[1] + '_' + PATHS[2];
-          BRANCH_NAME="${PATHS[1]}_${PATHS[2]}"
+          BRANCH_NAME="${github.base_ref}"
           # console.log(BRANCH_NAME); // 'pull_27'
           echo $BRANCH_NAME
           # process.env.BRANCH = 'pull_27';
