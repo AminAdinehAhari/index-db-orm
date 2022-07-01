@@ -26,15 +26,8 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Extract branch name
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        id: extract_branch
-
-
       - name: Run the tests
         run: npm test
-
 
       # Only run the coverage once
       - if: ${{ matrix.node-version == '12.x' }}
@@ -75,7 +68,7 @@ jobs:
         with:
           auth: ${{ secrets.GIST_SECRET }}
           gistID: 0be9f6ac374b7c312b8f08c2322100ec
-          filename: index-db-orm__${{ steps.extract_branch.outputs.branch }}.json
+          filename: index-db-orm__${{ GITHUB_REF##*/ }}.json
           label: Test Coverage
           message: ${{ env.COVERAGE }}
           color: green
