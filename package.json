@@ -6,7 +6,9 @@
   "scripts": {
     "test": "jest  --forceExit --detectOpenHandles",
     "dev": "SET NODE_ENV=development&& webpack",
-    "build": "webpack"
+    "build": "SET NODE_ENV=production&& webpack",
+    "dev:server": "NODE_ENV=development webpack",
+    "build:server": "NODE_ENV=production webpack"
   },
   "repository": {
     "type": "git",
