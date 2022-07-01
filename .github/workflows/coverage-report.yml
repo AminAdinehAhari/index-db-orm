@@ -64,7 +64,7 @@ jobs:
           # var PATHS = REF.split('/');
           IFS='/' read -ra PATHS <<< "$REF"
           # var BRANCH_NAME = PATHS[1] + '_' + PATHS[2];
-          BRANCH_NAME="${github.base_ref}"
+          BRANCH_NAME="${PATHS[1]}_${PATHS[2]}"
           # console.log(BRANCH_NAME); // 'pull_27'
           echo $BRANCH_NAME
           # process.env.BRANCH = 'pull_27';
@@ -75,7 +75,7 @@ jobs:
         with:
           auth: ${{ secrets.GIST_SECRET }}
           gistID: 0be9f6ac374b7c312b8f08c2322100ec
-          filename: index-db-orm__${{ github.base_ref }}.json
+          filename: index-db-orm__${{ env.BRANCH }}.json
           label: Test Coverage
           message: ${{ env.COVERAGE }}
           color: green
