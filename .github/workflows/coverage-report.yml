@@ -31,7 +31,7 @@ jobs:
 
       # print branch name
       - name: Get branch name
-        run: echo running on branch ${{GITHUB_REF##*/}|
+        run: echo running on branch ${{GITHUB_REF##*/}}
 
       - name: Set up Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
