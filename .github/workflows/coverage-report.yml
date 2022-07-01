@@ -15,6 +15,12 @@ jobs:
         node-version: [12.x]
 
     steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+
+
       - name: Checkout repository
         uses: actions/checkout@v2
 
@@ -68,7 +74,7 @@ jobs:
         with:
           auth: ${{ secrets.GIST_SECRET }}
           gistID: 0be9f6ac374b7c312b8f08c2322100ec
-          filename: index-db-orm__${ GITHUB_REF }.json
+          filename: index-db-orm__${{ process.env.BRANCH }}.json
           label: Test Coverage
           message: ${{ env.COVERAGE }}
           color: green
