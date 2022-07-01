@@ -32,7 +32,15 @@ const db_schema_1 = {
                 {name: 'index6', keyPath: 'key6', option: {unique: false}},
                 {name: 'index5', keyPath: ['key3','key4'], option: {unique: false}},
             ]
-        }
+        },
+        {
+            name: "store4",
+            indexes: [
+                {name: 'index1', keyPath: 'key1', option: {unique: true}},
+                {name: 'index2', keyPath: 'key2', option: {unique: false}},
+                {name: 'index3', keyPath: ['key3', 'key4'], option: {unique: false}},
+            ]
+        },
     ]
 };
 
@@ -1489,34 +1497,34 @@ describe('store', () => {
 
         //---------------------------
 
-        let insertEvent1 = orm.testDataBase.store2.onInsert(function(){
+        let insertEvent1 = orm.testDataBase.store4.onInsert(function(){
             insertCount += 1;
         });
 
-        let insertEvent2 = orm.testDataBase.store2.onInsert(function(){
+        let insertEvent2 = orm.testDataBase.store4.onInsert(function(){
             insertCount += 1;
         });
 
 
-        let updateEvent1 = orm.testDataBase.store2.onUpdate(function(){
+        let updateEvent1 = orm.testDataBase.store4.onUpdate(function(){
             updateCount += 1;
         });
 
-        let updateEvent2 = orm.testDataBase.store2.onUpdate(function(){
+        let updateEvent2 = orm.testDataBase.store4.onUpdate(function(){
             updateCount += 1;
         });
 
-        let deleteEvent1 = orm.testDataBase.store2.onDelete(function(){
+        let deleteEvent1 = orm.testDataBase.store4.onDelete(function(){
             deleteCount += 1;
         });
 
-        let deleteEvent2 = orm.testDataBase.store2.onDelete(function(){
+        let deleteEvent2 = orm.testDataBase.store4.onDelete(function(){
             deleteCount += 1;
         });
 
         //--------------------------
 
-        let resInsert1 = await orm.insert("testDataBase", "store2", {
+        let resInsert1 = await orm.insert("testDataBase", "store4", {
             key1: "abc",
             key2: 0,
             key3: 100000,
@@ -1525,22 +1533,22 @@ describe('store', () => {
 
         expect(insertCount === 2).toBeTruthy();
 
-        let resUpdate1 = await orm.update("testDataBase", "store2", {
+        let resUpdate1 = await orm.update("testDataBase", "store4", {
             ...resInsert1,
             key1: "abc777777777",
         });
 
         expect(updateCount === 2).toBeTruthy();
 
-        let resDelete1 = await orm.delete("testDataBase", "store2",resInsert1.__pk);
+        let resDelete1 = await orm.delete("testDataBase", "store4",resInsert1.__pk);
 
         expect(deleteCount === 2).toBeTruthy();
 
         //---------------------------------------------
 
-        orm.testDataBase.store2.unbindInsert(insertEvent1)
+        orm.testDataBase.store4.unbindInsert(insertEvent1)
 
-        let resInsert2 = await orm.insert("testDataBase", "store2", {
+        let resInsert2 = await orm.insert("testDataBase", "store4", {
             key1: "abc3",
             key2: 234,
             key3: 1000,
@@ -1548,18 +1556,18 @@ describe('store', () => {
         });
 
 
-        orm.testDataBase.store2.unbindUpdate(updateEvent1);
+        orm.testDataBase.store4.unbindUpdate(updateEvent1);
 
-        let resUpdate2 = await orm.update("testDataBase", "store2", {
+        let resUpdate2 = await orm.update("testDataBase", "store4", {
             ...resInsert2,
             key1: "abc345",
         });
 
 
-        orm.testDataBase.store2.unbindDelete(deleteEvent1);
+        orm.testDataBase.store4.unbindDelete(deleteEvent1);
 
 
-        let resDelete2 = await orm.delete("testDataBase", "store2", resInsert2.__pk);
+        let resDelete2 = await orm.delete("testDataBase", "store4", resInsert2.__pk);
 
         expect(insertCount === 3).toBeTruthy();
         expect(updateCount === 3).toBeTruthy();
@@ -1567,23 +1575,23 @@ describe('store', () => {
 
         // //---------------------------------------------
 
-        orm.testDataBase.store2.unbindAllInsert();
-        orm.testDataBase.store2.unbindAllUpdate();
-        orm.testDataBase.store2.unbindAllDelete();
+        orm.testDataBase.store4.unbindAllInsert();
+        orm.testDataBase.store4.unbindAllUpdate();
+        orm.testDataBase.store4.unbindAllDelete();
 
-        let resInsert3 = await orm.insert("testDataBase", "store2", {
+        let resInsert3 = await orm.insert("testDataBase", "store4", {
             key1: "ab2c233",
             key2: 2334,
             key3: 10040,
             key4: "cde43242",
         });
 
-        let resUpdate3 = await orm.update("testDataBase", "store2", {
+        let resUpdate3 = await orm.update("testDataBase", "store4", {
             ...resInsert3,
             key1: "ab2c56",
         });
 
-        let resDelete3 = await orm.delete("testDataBase", "store2", resInsert3.__pk);
+        let resDelete3 = await orm.delete("testDataBase", "store4", resInsert3.__pk);
 
         expect(insertCount === 3).toBeTruthy();
         expect(updateCount === 3).toBeTruthy();
