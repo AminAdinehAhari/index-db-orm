@@ -4,6 +4,7 @@ on:
     branches:
       - master
       - main
+      - develop
 jobs:
   build:
 
@@ -14,8 +15,16 @@ jobs:
         node-version: [12.x]
 
     steps:
+
       - name: Checkout repository
         uses: actions/checkout@v2
+
+      - name: get-npm-version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@main
+
+      - name: Get branch name base_ref
+        run: echo package-version ${{ steps.package-version.outputs.current-version }}
 
       - name: Set up Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
@@ -27,7 +36,6 @@ jobs:
 
       - name: Run the tests
         run: npm test
-
 
       # Only run the coverage once
       - if: ${{ matrix.node-version == '12.x' }}
@@ -68,7 +76,7 @@ jobs:
         with:
           auth: ${{ secrets.GIST_SECRET }}
           gistID: 0be9f6ac374b7c312b8f08c2322100ec
-          filename: index-db-orm__${{ env.BRANCH }}.json
+          filename: index-db-orm_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json
           label: Test Coverage
           message: ${{ env.COVERAGE }}
           color: green
