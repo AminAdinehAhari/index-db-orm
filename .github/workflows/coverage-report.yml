@@ -68,7 +68,7 @@ jobs:
         with:
           auth: ${{ secrets.GIST_SECRET }}
           gistID: 0be9f6ac374b7c312b8f08c2322100ec
-          filename: index-db-orm__${{ GITHUB_REF##*/ }}.json
+          filename: index-db-orm__${{ GITHUB_REF }}.json
           label: Test Coverage
           message: ${{ env.COVERAGE }}
           color: green
