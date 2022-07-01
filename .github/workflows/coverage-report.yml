@@ -16,9 +16,14 @@ jobs:
 
     steps:
       - name: Extract branch name
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        id: extract_branch
+          if: github.event_name != 'pull_request'
+          shell: bash
+          run: echo "::set-env name=$EXTRA_BRANCH_NAME::$(echo ${GITHUB_REF#refs/heads/})"
+          id: extract_branch
+
+      # print branch name
+      - name: Get branch name
+        run: echo 'The branch name is' $EXTRA_BRANCH_NAME
 
 
       - name: Checkout repository
@@ -74,7 +79,7 @@ jobs:
         with:
           auth: ${{ secrets.GIST_SECRET }}
           gistID: 0be9f6ac374b7c312b8f08c2322100ec
-          filename: index-db-orm__${{ process.env.BRANCH }}.json
+          filename: index-db-orm__${{ $EXTRA_BRANCH_NAME }}.json
           label: Test Coverage
           message: ${{ env.COVERAGE }}
           color: green
