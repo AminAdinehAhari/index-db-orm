@@ -4,7 +4,7 @@
   "description": "a library for easy connection and work with client-side data base",
   "main": "dist/index_bundle.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest  --forceExit --detectOpenHandles",
     "dev": "SET NODE_ENV=development&& webpack",
     "build": "SET NODE_ENV=production&& webpack"
   },
@@ -14,10 +14,12 @@
   },
   "keywords": [
     "index db",
-    "orm"
+    "orm",
+    "js",
+    "promise"
   ],
-  "author": "a.adine.a@gmail.com",
-  "license": "ISC",
+  "author": "Amin Adineh Ahari",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/AminAdinehAhari/index-db-orm/issues"
   },
@@ -36,5 +38,8 @@
     "uglifyjs-webpack-plugin": "^2.2.0",
     "webpack": "^4.44.1",
     "webpack-cli": "^3.3.12"
-  }
+  },
+  "contributors": [
+    "Amin Adineh Ahari (https://github.com/AminAdinehAhari)"
+  ]
 }

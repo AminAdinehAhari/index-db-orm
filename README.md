@@ -1,15 +1,5 @@
 # index-db-orm
 
-[![npm version](https://img.shields.io/npm/v/axios.svg?style=flat-square)](https://www.npmjs.org/package/axios)
-[![CDNJS](https://img.shields.io/cdnjs/v/axios.svg?style=flat-square)](https://cdnjs.com/libraries/axios)
-![Build status](https://github.com/axios/axios/actions/workflows/ci.yml/badge.svg) 
-[![code coverage](https://img.shields.io/coveralls/mzabriskie/axios.svg?style=flat-square)](https://coveralls.io/r/mzabriskie/axios)
-[![install size](https://packagephobia.now.sh/badge?p=axios)](https://packagephobia.now.sh/result?p=axios)
-[![npm downloads](https://img.shields.io/npm/dm/axios.svg?style=flat-square)](https://npm-stat.com/charts.html?package=axios)
-[![code helpers](https://www.codetriage.com/axios/axios/badges/users.svg)](https://www.codetriage.com/axios/axios)
-![npm bundle size](https://img.shields.io/bundlephobia/minzip/axios)
-
-
 Promise based using indexDb for the browser.
 
 
@@ -372,7 +362,7 @@ also you can use `onRebuild` as
 
 ```js
 orm.onRebuildDB("dataBaseName", function () {
-  console.log("pandosLogs rebuild )))))))))))))))))))))");
+  console.log("rebuild event )))))))))))))))))))))");
 })
 ```
 

@@ -14,7 +14,6 @@ class OrmIndexDb {
     IDB = null;
     IDBTransaction = null;
     IDBKeyRange = null;
-    __isSupport = false;
     __schema = {};
     __mode = 'product';
 
@@ -24,10 +23,7 @@ class OrmIndexDb {
      */
     constructor(mode = 'product') {
         this.__mode = mode;
-        try {
-            this.checkBrowserSupport();
-        } catch (e) {
-        }
+        this.checkBrowserSupport();
     }
 
     // Support Functions ------------------------
@@ -42,29 +38,23 @@ class OrmIndexDb {
             this.IDBTransaction = fakerIDBTransaction;
             this.IDBKeyRange = fakerIDBKeyRange;
         } else {
-            this.IDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
-            this.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction || {READ_WRITE: "readwrite"}; // This line should only be needed if it is needed to support the object's constants for older browsers
-            this.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange;
+            try {
+                this.IDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+                this.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction || {READ_WRITE: "readwrite"}; // This line should only be needed if it is needed to support the object's constants for older browsers
+                this.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange;
+            }catch (e) {
+                this.IDB = null;
+                this.IDBTransaction = null;
+                this.IDBKeyRange = null;
+            }
         }
 
 
         if (!!!this.IDB) {
-            this.__isSupport = false;
-            console.error(textMessage.ErrorBrowserSupport);
             throw textMessage.ErrorBrowserSupport;
-        } else {
-            this.__isSupport = true;
         }
     }
 
-    /**
-     * checkSupport
-     */
-    checkSupport() {
-        if (!this.__isSupport) {
-            throw textMessage.ErrorBrowserSupport;
-        }
-    }
 
     //-------------------------------------------
     //-------------------------------------------
@@ -137,12 +127,20 @@ class OrmIndexDb {
      */
     async removeDataBase(name) {
         try {
-            await this.IDB.deleteDatabase(name);
+            await this._closeDB(name);
+        }catch (e) {}
+
+        try {
+            await this.IDB?.deleteDatabase(name);
+        } catch (error) {
+            // return error;
+        }
+
+        try {
             this._removeDataBaseOfSchema(name);
             this._removeDataBaseOfClass(name);
             return this;
-        } catch (error) {
-            console.log(error);
+        }catch (e) {
             return error;
         }
     }
@@ -236,6 +234,15 @@ class OrmIndexDb {
     }
 
 
+
+    async allDbClose(){
+        for (let i in this.__schema){
+            await this._closeDB(i)
+        }
+        return this;
+    }
+
+
     // Private ----------------------------------
 
     /**
@@ -248,7 +255,6 @@ class OrmIndexDb {
         const version = Math.max(this.__schema[name].version, this.__schema[name].currentVersion);
 
         return new Promise((resolve, reject) => {
-            this.checkSupport();
             try {
                 const request = this.IDB.open(name, version);
 

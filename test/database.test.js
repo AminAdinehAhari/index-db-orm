@@ -1,4 +1,4 @@
-import {afterEach, describe, expect, jest} from "@jest/globals";
+import {afterAll, describe, expect, jest} from "@jest/globals";
 import ormClass from "../src/index";
 
 
@@ -18,7 +18,6 @@ const db_schema_1 = {
 };
 
 const orm = new ormClass('test');
-
 
 describe('database', () => {
 
@@ -88,4 +87,11 @@ describe('database', () => {
 
 
 
+});
+
+
+
+afterAll((done) => {
+    orm.allDbClose().then((res)=>{});
+    done();
 });
