@@ -16,36 +16,34 @@ jobs:
 
     steps:
 
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
 
-      - name: get-npm-version
+      - name: Get NPM Version
         id: package-version
         uses: martinbeentjes/npm-get-version-action@main
 
-      - name: Get branch name base_ref
-        run: echo package-version ${{ steps.package-version.outputs.current-version }}
 
-      - name: Set up Node.js ${{ matrix.node-version }}
+      - name: Set Up Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: npm install
 
-      - name: Run the Dev
+      - name: Run The Dev
         run: npm run dev:server
 
-      - name: Run the Build
+      - name: Run The Build
         run: npm run build:server
 
-      - name: Run the tests
+      - name: Run The Tests
         run: npm test
 
-      - name: Get Coverage for badge
+      - name: Get Coverage For Badge
         run: |
           # var SUMMARY = [
           #   '',
@@ -80,7 +78,8 @@ jobs:
 
 
 
-      - name: Create the Badge
+
+      - name: Create The TEST Badge
         uses: schneegans/dynamic-badges-action@v1.0.0
         with:
           auth: ${{ secrets.GIST_SECRET }}
@@ -91,7 +90,7 @@ jobs:
           color: green
           namedLogo: jest
 
-      - name: Create Develop Passing badage
+      - name: Create Develop Passing Badage
         uses: schneegans/dynamic-badges-action@v1.0.0
         with:
           auth: ${{ secrets.GIST_SECRET }}
@@ -110,26 +109,6 @@ jobs:
           label: build
           message: passing
           color: green
-
-      - name: Package size report
-        uses: pkg-size/action@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          build-command: false
-          display-size: uncompressed, brotli
-
-
-      - if: ${{ github.base_ref == 'develop' }}
-        name: Create Version badage
-        uses: schneegans/dynamic-badges-action@v1.0.0
-        with:
-          auth: ${{ secrets.GIST_SECRET }}
-          gistID: 0be9f6ac374b7c312b8f08c2322100ec
-          filename: index-db-orm_ci_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json
-          label: ci
-          message: v${{ steps.package-version.outputs.current-version }} +
-          color: orange
 
       - if: ${{ github.base_ref == 'develop' }}
         name: Create Version badage
@@ -174,7 +153,18 @@ jobs:
           BEGIN_TAG: "<!-- BEGIN LATEST BADGE -->"
           END_TAG: "<!-- END LATEST BADGE -->"
         run: |
-          UPDATE=$(cat README.md | perl -0777 -pe 's#(${{ env.BEGIN_TAG }})(?:.|\n)*?(${{ env.END_TAG }})#${1}\n[![Download ${{ env.FORMAT }}](https://custom-icon-badges.herokuapp.com)\n${2}#g')
+          UPDATE=$(cat README.md | perl -0777 -pe 's#(${{ env.BEGIN_TAG }})(?:.|\n)*?(${{ env.END_TAG }})#${1}\n
+          [![npm version](https://img.shields.io/npm/v/axios.svg?style=flat-square)](https://www.npmjs.org/package/axios)
+          [![CDNJS](https://img.shields.io/cdnjs/v/axios.svg?style=flat-square)](https://cdnjs.com/libraries/axios)
+          ![Build status](https://github.com/axios/axios/actions/workflows/ci.yml/badge.svg)
+          [![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/axios/axios)
+          [![code coverage](https://img.shields.io/coveralls/mzabriskie/axios.svg?style=flat-square)](https://coveralls.io/r/mzabriskie/axios)
+          [![install size](https://packagephobia.now.sh/badge?p=axios)](https://packagephobia.now.sh/result?p=axios)
+          [![npm downloads](https://img.shields.io/npm/dm/axios.svg?style=flat-square)](https://npm-stat.com/charts.html?package=axios)
+          [![gitter chat](https://img.shields.io/gitter/room/mzabriskie/axios.svg?style=flat-square)](https://gitter.im/mzabriskie/axios)
+          [![code helpers](https://www.codetriage.com/axios/axios/badges/users.svg)](https://www.codetriage.com/axios/axios)
+          [![Known Vulnerabilities](https://snyk.io/test/npm/axios/badge.svg)](https://snyk.io/test/npm/axios)
+          ![npm bundle size](https://img.shields.io/bundlephobia/minzip/axios)\n${2}#g')
           echo "${UPDATE}" > README.md
 
       - uses: EndBug/add-and-commit@v7
