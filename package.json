@@ -2,7 +2,7 @@
   "name": "index-db-orm",
   "version": "0.0.0",
   "description": "a library for easy connection and work with client-side data base",
-  "main": "dist/index_bundle.js",
+  "main": "dist/ormIndexDB.js",
   "scripts": {
     "test": "jest  --forceExit --detectOpenHandles",
     "dev": "SET NODE_ENV=development&& webpack",
