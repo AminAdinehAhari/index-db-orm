@@ -163,3 +163,22 @@ jobs:
           message: passing
           color: green
           namedLogo: github
+
+      - name: Readme Test Change ReadMe Action
+        env:
+          GITHUB_USER: "DenverCoder1"
+          REPO: "readme-download-button-action"
+          FORMAT: "zip"
+          VERSION: "${{ steps.get-latest-release.outputs.tag_name }}"
+          COLOR: "blue"
+          BEGIN_TAG: "<!-- BEGIN LATEST BADGE -->"
+          END_TAG: "<!-- END LATEST BADGE -->"
+        run: |
+          UPDATE=$(cat README.md | perl -0777 -pe 's#(${{ env.BEGIN_TAG }})(?:.|\n)*?(${{ env.END_TAG }})#${1}\n[![Download ${{ env.FORMAT }}](https://custom-icon-badges.herokuapp.com)\n${2}#g')
+          echo "${UPDATE}" > README.md
+
+      - uses: EndBug/add-and-commit@v7
+        with:
+          message: "docs(readme): Bump download button version to ${{ steps.get-latest-release.outputs.tag_name }}"
+          default_author: github_actions
+          branch: ${{ github.base_ref }}

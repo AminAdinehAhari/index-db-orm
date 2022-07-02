@@ -1,5 +1,8 @@
 # index-db-orm
 
+<!-- BEGIN LATEST BADGE -->
+<!-- END LATEST BADGE -->
+
 Promise based using indexDb for the browser.
 
 
