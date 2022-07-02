@@ -111,13 +111,10 @@ jobs:
           message: passing
           color: green
 
-      - name: Calc File size
-        uses: chrysanthos/simple-asset-size-reporter@1.0.0
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          files: [dist/*.js]
-          with-same: false
-          build-assets: false
+      - name: Package size report
+        uses: pkg-size/action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
       - if: ${{ github.base_ref == 'develop' }}
