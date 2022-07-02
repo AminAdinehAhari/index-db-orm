@@ -2,9 +2,12 @@
 import textMessage from "./helper/textMessage";
 import configs from "./helper/configs";
 
-const fakerIDB = require("fake-indexeddb");
-const fakerIDBKeyRange = require("fake-indexeddb/lib/FDBKeyRange");
-const fakerIDBTransaction = require("fake-indexeddb/lib/FDBTransaction");
+if (process.env.NODE_ENV === 'development'){
+    const fakerIDB = require("fake-indexeddb");
+    const fakerIDBKeyRange = require("fake-indexeddb/lib/FDBKeyRange");
+    const fakerIDBTransaction = require("fake-indexeddb/lib/FDBTransaction");
+}
+
 
 const ormDBName = "___orm";
 const ormStorePagination = "paginate";
@@ -34,9 +37,11 @@ class OrmIndexDb {
      */
     checkBrowserSupport() {
         if (this.__mode === 'test') {
-            this.IDB = fakerIDB;
-            this.IDBTransaction = fakerIDBTransaction;
-            this.IDBKeyRange = fakerIDBKeyRange;
+            if (process.env.NODE_ENV === 'development') {
+                this.IDB = fakerIDB;
+                this.IDBTransaction = fakerIDBTransaction;
+                this.IDBKeyRange = fakerIDBKeyRange;
+            }
         } else {
             try {
                 this.IDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
