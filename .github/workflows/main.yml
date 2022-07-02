@@ -115,9 +115,9 @@ jobs:
         uses: chrysanthos/simple-asset-size-reporter@1.0.0
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          files: ["dist/*.js"]
-          with-same: 'false'
-          build-assets: 'false'
+          files: [dist/*.js]
+          with-same: false
+          build-assets: false
 
 
       - if: ${{ github.base_ref == 'develop' }}
