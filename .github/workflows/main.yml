@@ -34,7 +34,7 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run the Build
+      - name: Run the Dev
         run: npm run dev:server
 
       - name: Run the Build
@@ -63,7 +63,6 @@ jobs:
           TOKENS=($SUMMARY)
           # process.env.COVERAGE = '31.93%';
           echo "COVERAGE=$(echo ${TOKENS[2]})" >> $GITHUB_ENV
-
           # var REF = 'refs/pull/27/merge.json';
           REF=${{ github.ref }}
           # console.log('github.ref: ' + REF);
@@ -90,3 +89,16 @@ jobs:
           message: ${{ env.COVERAGE }}
           color: green
           namedLogo: jest
+
+
+      - if: ${{ matrix.node-version == '12.x' }}
+        name: Create CI Passing badage
+        uses: schneegans/dynamic-badges-action@v1.0.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: 0be9f6ac374b7c312b8f08c2322100ec
+          filename: index-db-orm_ci_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json
+          label: ci
+          message: passing
+          color: green
+          namedLogo: github
