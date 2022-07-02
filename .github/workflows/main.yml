@@ -125,7 +125,7 @@ jobs:
         with:
           auth: ${{ secrets.GIST_SECRET }}
           gistID: 0be9f6ac374b7c312b8f08c2322100ec
-          filename: index-db-orm_ci_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json
+          filename: index-db-orm_version_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json
           label: version
           message: v${{ steps.package-version.outputs.current-version }} +
           color: orange
@@ -136,7 +136,7 @@ jobs:
         with:
           auth: ${{ secrets.GIST_SECRET }}
           gistID: 0be9f6ac374b7c312b8f08c2322100ec
-          filename: index-db-orm_ci_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json
+          filename: index-db-orm_version_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json
           label: version
           message: v${{ steps.package-version.outputs.current-version }}
           color: green
