@@ -2,7 +2,7 @@
 import textMessage from "./helper/textMessage";
 import configs from "./helper/configs";
 
-if (process.env.NODE_ENV === 'development'){
+if (process.env.NODE_ENV !== 'production'){
     const fakerIDB = require("fake-indexeddb");
     const fakerIDBKeyRange = require("fake-indexeddb/lib/FDBKeyRange");
     const fakerIDBTransaction = require("fake-indexeddb/lib/FDBTransaction");
@@ -37,7 +37,7 @@ class OrmIndexDb {
      */
     checkBrowserSupport() {
         if (this.__mode === 'test') {
-            if (process.env.NODE_ENV === 'development') {
+            if (process.env.NODE_ENV !== 'production') {
                 this.IDB = fakerIDB;
                 this.IDBTransaction = fakerIDBTransaction;
                 this.IDBKeyRange = fakerIDBKeyRange;
