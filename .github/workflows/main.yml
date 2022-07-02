@@ -18,6 +18,8 @@ jobs:
 
       - name: Checkout repository
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
       - name: get-npm-version
         id: package-version
@@ -42,7 +44,6 @@ jobs:
 
       - name: Run the tests
         run: npm test
-
 
       - name: Get Coverage for badge
         run: |
@@ -77,6 +78,8 @@ jobs:
 
 
 
+
+
       - name: Create the Badge
         uses: schneegans/dynamic-badges-action@v1.0.0
         with:
@@ -107,6 +110,12 @@ jobs:
           label: build
           message: passing
           color: green
+
+      - uses: chrysanthos/simple-asset-size-reporter@1.0.0
+          with:
+            repo-token: ${{ secrets.GITHUB_TOKEN }}
+            files: ["dist/ormIndexDB.js", "dist/ormIndexDB.js"]
+
 
       - if: ${{ github.base_ref == 'develop' }}
         name: Create Version badage
