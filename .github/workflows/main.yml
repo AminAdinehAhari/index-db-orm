@@ -111,10 +111,11 @@ jobs:
           message: passing
           color: green
 
-      - uses: chrysanthos/simple-asset-size-reporter@1.0.0
-          with:
-            repo-token: ${{ secrets.GITHUB_TOKEN }}
-            files: ["dist/ormIndexDB.js", "dist/ormIndexDB.js"]
+      - name: Calc File size
+        uses: chrysanthos/simple-asset-size-reporter@1.0.0
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          files: ["dist/ormIndexDB.js", "dist/ormIndexDB.js"]
 
 
       - if: ${{ github.base_ref == 'develop' }}
