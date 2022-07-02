@@ -1,7 +1,7 @@
 import {afterAll, describe, expect} from "@jest/globals";
 import ormClass from "../src/index"
 import textMessage from "../src/modules/helper/textMessage";
-// const ormClass = require('../dist/ormIndexDB');
+// const ormClass = require('../dist/indexDbOrm');
 
 
 
