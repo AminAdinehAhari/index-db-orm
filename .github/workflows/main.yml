@@ -90,6 +90,27 @@ jobs:
           color: green
           namedLogo: jest
 
+      - if: ${{ matrix.node-version == '12.x' }}
+        name: Create CI Passing badage
+        uses: schneegans/dynamic-badges-action@v1.0.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: 0be9f6ac374b7c312b8f08c2322100ec
+          filename: index-db-orm_develop_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json
+          label: develop build
+          message: passing
+          color: green
+
+      - if: ${{ matrix.node-version == '12.x' }}
+        name: Create CI Passing badage
+        uses: schneegans/dynamic-badges-action@v1.0.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: 0be9f6ac374b7c312b8f08c2322100ec
+          filename: index-db-orm_build_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json
+          label: build
+          message: passing
+          color: green
 
       - if: ${{ matrix.node-version == '12.x' }}
         name: Create CI Passing badage
