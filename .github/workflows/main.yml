@@ -44,8 +44,7 @@ jobs:
         run: npm test
 
 
-      - if: ${{ matrix.node-version == '12.x' }}
-        name: Get Coverage for badge
+      - name: Get Coverage for badge
         run: |
           # var SUMMARY = [
           #   '',
@@ -78,8 +77,7 @@ jobs:
 
 
 
-      - if: ${{ matrix.node-version == '12.x' }}
-        name: Create the Badge
+      - name: Create the Badge
         uses: schneegans/dynamic-badges-action@v1.0.0
         with:
           auth: ${{ secrets.GIST_SECRET }}
@@ -90,8 +88,7 @@ jobs:
           color: green
           namedLogo: jest
 
-      - if: ${{ matrix.node-version == '12.x' }}
-        name: Create CI Passing badage
+      - name: Create Develop Passing badage
         uses: schneegans/dynamic-badges-action@v1.0.0
         with:
           auth: ${{ secrets.GIST_SECRET }}
@@ -101,8 +98,7 @@ jobs:
           message: passing
           color: green
 
-      - if: ${{ matrix.node-version == '12.x' }}
-        name: Create CI Passing badage
+      - name: Create Build Passing badage
         uses: schneegans/dynamic-badges-action@v1.0.0
         with:
           auth: ${{ secrets.GIST_SECRET }}
@@ -112,8 +108,40 @@ jobs:
           message: passing
           color: green
 
-      - if: ${{ matrix.node-version == '12.x' }}
-        name: Create CI Passing badage
+      - if: ${{ github.base_ref == 'develop' }}
+        name: Create Version badage
+        uses: schneegans/dynamic-badges-action@v1.0.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: 0be9f6ac374b7c312b8f08c2322100ec
+          filename: index-db-orm_ci_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json
+          label: ci
+          message: v${{ steps.package-version.outputs.current-version }} +
+          color: orange
+
+      - if: ${{ github.base_ref == 'develop' }}
+        name: Create Version badage
+        uses: schneegans/dynamic-badges-action@v1.0.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: 0be9f6ac374b7c312b8f08c2322100ec
+          filename: index-db-orm_ci_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json
+          label: version
+          message: v${{ steps.package-version.outputs.current-version }} +
+          color: orange
+
+      - if: ${{ github.base_ref != 'develop' }}
+        name: Create Version badage
+        uses: schneegans/dynamic-badges-action@v1.0.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: 0be9f6ac374b7c312b8f08c2322100ec
+          filename: index-db-orm_ci_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json
+          label: version
+          message: v${{ steps.package-version.outputs.current-version }}
+          color: green
+
+      - name: Create CI Passing badage
         uses: schneegans/dynamic-badges-action@v1.0.0
         with:
           auth: ${{ secrets.GIST_SECRET }}
