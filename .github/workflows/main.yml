@@ -111,14 +111,6 @@ jobs:
           message: passing
           color: green
 
-      - name: Package size report
-        uses: pkg-size/action@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          build-command: false
-          display-size: uncompressed, brotli
-
 
       - if: ${{ github.base_ref == 'develop' }}
         name: Create Version badage
