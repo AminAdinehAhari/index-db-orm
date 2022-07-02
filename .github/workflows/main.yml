@@ -1,4 +1,4 @@
-name: Coverage report
+name: main
 on:
   pull_request:
     branches:
@@ -35,12 +35,15 @@ jobs:
         run: npm install
 
       - name: Run the Build
+        run: npm run dev:server
+
+      - name: Run the Build
         run: npm run build:server
 
       - name: Run the tests
         run: npm test
 
-      # Only run the coverage once
+
       - if: ${{ matrix.node-version == '12.x' }}
         name: Get Coverage for badge
         run: |
@@ -73,13 +76,16 @@ jobs:
           echo $BRANCH_NAME
           # process.env.BRANCH = 'pull_27';
           echo "BRANCH=$(echo ${BRANCH_NAME})" >> $GITHUB_ENV
+
+
+
       - if: ${{ matrix.node-version == '12.x' }}
         name: Create the Badge
         uses: schneegans/dynamic-badges-action@v1.0.0
         with:
           auth: ${{ secrets.GIST_SECRET }}
           gistID: 0be9f6ac374b7c312b8f08c2322100ec
-          filename: index-db-orm_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json
+          filename: index-db-orm_test_coverage_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json
           label: Test Coverage
           message: ${{ env.COVERAGE }}
           color: green
