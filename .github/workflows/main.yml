@@ -145,15 +145,15 @@ jobs:
 
       - name: Readme Test Change ReadMe Action
         env:
-          GITHUB_USER: "DenverCoder1"
-          REPO: "readme-download-button-action"
-          FORMAT: "zip"
-          VERSION: "${{ steps.get-latest-release.outputs.tag_name }}"
-          COLOR: "blue"
+          BADAGE_CI_PASSING: "https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AminAdinehAhari/0be9f6ac374b7c312b8f08c2322100ec/raw/ccbbfe966eb2fb85428ceb8c92d099a039411bd0/index-db-orm_ci_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json"
+          BADAGE_VERSION: "https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AminAdinehAhari/0be9f6ac374b7c312b8f08c2322100ec/raw/ccbbfe966eb2fb85428ceb8c92d099a039411bd0/index-db-orm_version_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json"
+          BADAGE_BUILD: "https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AminAdinehAhari/0be9f6ac374b7c312b8f08c2322100ec/raw/ccbbfe966eb2fb85428ceb8c92d099a039411bd0/index-db-orm_build_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json"
+          BADAGE_DEVELOP_BUILD: "https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AminAdinehAhari/0be9f6ac374b7c312b8f08c2322100ec/raw/ccbbfe966eb2fb85428ceb8c92d099a039411bd0/index-db-orm_develop_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json"
+          BADAGE_TEST: "https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AminAdinehAhari/0be9f6ac374b7c312b8f08c2322100ec/raw/ccbbfe966eb2fb85428ceb8c92d099a039411bd0/index-db-orm_test_coverage_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json"
           BEGIN_TAG: "<!-- BEGIN LATEST BADGE -->"
           END_TAG: "<!-- END LATEST BADGE -->"
         run: |
-          UPDATE=$(cat README.md | perl -0777 -pe 's#(${{ env.BEGIN_TAG }})(?:.|\n)*?(${{ env.END_TAG }})#${1}\n[![Download ${{ steps.package-version.outputs.current-version }}](https://custom-icon-badges.herokuapp.com)\n${2}#g')
+          UPDATE=$(cat README.md | perl -0777 -pe 's#(${{ env.BEGIN_TAG }})(?:.|\n)*?(${{ env.END_TAG }})#${1}\n[![code coverage](${{ env.BADAGE_TEST }})](${{ env.BADAGE_TEST }})\n${2}#g')
           echo "${UPDATE}" > README.md
 
       - uses: EndBug/add-and-commit@v7
