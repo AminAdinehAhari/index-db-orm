@@ -1,7 +1,7 @@
 # index-db-orm
 
 <!-- BEGIN LATEST BADGE -->
-[![Download zip](https://custom-icon-badges.herokuapp.com)
+[![Download 0.0.0](https://custom-icon-badges.herokuapp.com)
 <!-- END LATEST BADGE -->
 
 Promise based using indexDb for the browser.
