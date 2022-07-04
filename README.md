@@ -1,7 +1,7 @@
 # index-db-orm
 
 <!-- BEGIN LATEST BADGE -->
-[![Download 0.0.0](https://custom-icon-badges.herokuapp.com)
+[![code coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AminAdinehAhari/0be9f6ac374b7c312b8f08c2322100ec/raw/ccbbfe966eb2fb85428ceb8c92d099a039411bd0/index-db-orm_test_coverage_badge_develop_v0.0.0.json)](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AminAdinehAhari/0be9f6ac374b7c312b8f08c2322100ec/raw/ccbbfe966eb2fb85428ceb8c92d099a039411bd0/index-db-orm_test_coverage_badge_develop_v0.0.0.json)
 <!-- END LATEST BADGE -->
 
 Promise based using indexDb for the browser.
