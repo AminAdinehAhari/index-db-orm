@@ -153,12 +153,13 @@ jobs:
 
       - name: Readme Test Change ReadMe Action
         env:
-          BADAGE_NPM: "https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AminAdinehAhari/0be9f6ac374b7c312b8f08c2322100ec/raw/ccbbfe966eb2fb85428ceb8c92d099a039411bd0/index-db-orm_npm_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json"
-          BADAGE_CI_PASSING: "https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AminAdinehAhari/0be9f6ac374b7c312b8f08c2322100ec/raw/ccbbfe966eb2fb85428ceb8c92d099a039411bd0/index-db-orm_ci_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json"
-          BADAGE_VERSION: "https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AminAdinehAhari/0be9f6ac374b7c312b8f08c2322100ec/raw/ccbbfe966eb2fb85428ceb8c92d099a039411bd0/index-db-orm_version_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json"
-          BADAGE_BUILD: "https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AminAdinehAhari/0be9f6ac374b7c312b8f08c2322100ec/raw/ccbbfe966eb2fb85428ceb8c92d099a039411bd0/index-db-orm_build_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json"
-          BADAGE_DEVELOP_BUILD: "https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AminAdinehAhari/0be9f6ac374b7c312b8f08c2322100ec/raw/ccbbfe966eb2fb85428ceb8c92d099a039411bd0/index-db-orm_develop_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json"
-          BADAGE_TEST: "https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AminAdinehAhari/0be9f6ac374b7c312b8f08c2322100ec/raw/ccbbfe966eb2fb85428ceb8c92d099a039411bd0/index-db-orm_test_coverage_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json"
+          BADAGE_NPM: "https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AminAdinehAhari/0be9f6ac374b7c312b8f08c2322100ec/raw/index-db-orm_npm_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json"
+          LINK_NPM: "https://www.npmjs.com/package/index-db-orm/v/${{ steps.package-version.outputs.current-version }}"
+          BADAGE_CI_PASSING: "https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AminAdinehAhari/0be9f6ac374b7c312b8f08c2322100ec/raw/index-db-orm_ci_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json"
+          BADAGE_VERSION: "https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AminAdinehAhari/0be9f6ac374b7c312b8f08c2322100ec/raw/index-db-orm_version_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json"
+          BADAGE_BUILD: "https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AminAdinehAhari/0be9f6ac374b7c312b8f08c2322100ec/raw/index-db-orm_build_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json"
+          BADAGE_DEVELOP_BUILD: "https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AminAdinehAhari/0be9f6ac374b7c312b8f08c2322100ec/raw/index-db-orm_develop_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json"
+          BADAGE_TEST: "https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AminAdinehAhari/0be9f6ac374b7c312b8f08c2322100ec/raw/index-db-orm_test_coverage_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json"
           BEGIN_TAG: "<!-- BEGIN LATEST BADGE -->"
           END_TAG: "<!-- END LATEST BADGE -->"
         run: |
@@ -176,7 +177,8 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - uses: EndBug/add-and-commit@v7
+      - if: ${{ github.base_ref != 'develop' }}
+        uses: EndBug/add-and-commit@v7
         with:
           message: "publish package"
           default_author: github_actions

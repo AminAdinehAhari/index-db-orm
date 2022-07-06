@@ -5,3 +5,6 @@ node_modules/
 test/
 webpack.*.js
 jest.*.js
+.git/
+.github/
+.idea/
