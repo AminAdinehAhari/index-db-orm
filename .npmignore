@@ -6,3 +6,5 @@ test/
 webpack.*.js
 jest.*.js
 .git/
+.github/
+.idea/
