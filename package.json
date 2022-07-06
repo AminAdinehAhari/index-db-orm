@@ -1,16 +1,17 @@
 {
   "name": "index-db-orm",
-  "version": "0.0.0",
+  "version": "0.1.2",
   "description": "a library for easy connection and work with client-side data base",
-  "main": "dist/index_bundle.js",
   "scripts": {
     "test": "jest  --forceExit --detectOpenHandles",
     "dev": "SET NODE_ENV=development&& webpack",
-    "build": "SET NODE_ENV=production&& webpack"
+    "build": "SET NODE_ENV=production&& webpack",
+    "dev:server": "NODE_ENV=development webpack",
+    "build:server": "NODE_ENV=production webpack"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AminAdinehAhari/index-db-orm.git"
+    "url": "https://github.com/AminAdinehAhari/index-db-orm.git"
   },
   "keywords": [
     "index db",

@@ -9,8 +9,8 @@ module.exports = {
     entry: path.resolve(__dirname, "src/index.js"),
     output: {
         path: path.resolve(__dirname, "dist"),
-        filename: mode === 'production' ?  "ormIndexDB.min.js" : "ormIndexDB.js",
-        library: "ormIndexDB",
+        filename: mode === 'production' ?  "indexDbOrm.min.js" : "indexDbOrm.js",
+        library: "indexDbOrm",
         libraryTarget: "umd",
     },
     module: {

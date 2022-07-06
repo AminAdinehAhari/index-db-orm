@@ -1,3 +1,3 @@
-import orm from "./modules/ormIndexDb";
+import orm from "./modules/indexDbOrm";
 
 export default orm;

@@ -1,0 +1,188 @@
+name: main
+on:
+  pull_request:
+    branches:
+      - master
+      - main
+      - develop
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [12.x]
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Get NPM Version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@main
+
+
+      - name: Set Up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run The Dev
+        run: npm run dev:server
+
+      - name: Run The Build
+        run: npm run build:server
+
+      - name: Run The Tests
+        run: npm test
+
+      - name: Get Coverage For Badge
+        run: |
+          # var SUMMARY = [
+          #   '',
+          #   '=============================== Coverage summary ===============================',
+          #   'Statements   : 32.5% ( 39/120 )',
+          #   'Branches     : 38.89% ( 21/54 )',
+          #   'Functions    : 21.74% ( 5/23 )',
+          #   'Lines        : 31.93% ( 38/119 )',
+          #   '================================================================================',
+          #   ''
+          # ];
+          # SUMMARY = SUMMARY.split('\n')[5]; // 'Lines        : 31.93% ( 38/119 )'
+          # SUMMARY = SUMMARY.split(':')[1].split('(')[0].trim(); // '31.93%'
+          SUMMARY="$(npm test -- --coverageReporters='text-summary' | tail -2 | head -1)"
+          TOKENS=($SUMMARY)
+          # process.env.COVERAGE = '31.93%';
+          echo "COVERAGE=$(echo ${TOKENS[2]})" >> $GITHUB_ENV
+          # var REF = 'refs/pull/27/merge.json';
+          REF=${{ github.ref }}
+          # console.log('github.ref: ' + REF);
+          echo "github.ref: $REF"
+          # var PATHS = REF.split('/');
+          IFS='/' read -ra PATHS <<< "$REF"
+          # var BRANCH_NAME = PATHS[1] + '_' + PATHS[2];
+          BRANCH_NAME="${PATHS[1]}_${PATHS[2]}"
+          # console.log(BRANCH_NAME); // 'pull_27'
+          echo $BRANCH_NAME
+          # process.env.BRANCH = 'pull_27';
+          echo "BRANCH=$(echo ${BRANCH_NAME})" >> $GITHUB_ENV
+
+
+
+      - name: Create NPM Badage
+        uses: schneegans/dynamic-badges-action@v1.0.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: 0be9f6ac374b7c312b8f08c2322100ec
+          filename: index-db-orm_npm_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json
+          label: npm
+          message: ${{ steps.package-version.outputs.current-version }}
+          color: orange
+
+
+      - name: Create The TEST Badge
+        uses: schneegans/dynamic-badges-action@v1.0.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: 0be9f6ac374b7c312b8f08c2322100ec
+          filename: index-db-orm_test_coverage_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json
+          label: Test Coverage
+          message: ${{ env.COVERAGE }}
+          color: green
+          namedLogo: jest
+
+      - name: Create Develop Passing Badage
+        uses: schneegans/dynamic-badges-action@v1.0.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: 0be9f6ac374b7c312b8f08c2322100ec
+          filename: index-db-orm_develop_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json
+          label: develop build
+          message: passing
+          color: green
+
+      - name: Create Build Passing badage
+        uses: schneegans/dynamic-badges-action@v1.0.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: 0be9f6ac374b7c312b8f08c2322100ec
+          filename: index-db-orm_build_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json
+          label: build
+          message: passing
+          color: green
+
+      - if: ${{ github.base_ref == 'develop' }}
+        name: Create Version badage
+        uses: schneegans/dynamic-badges-action@v1.0.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: 0be9f6ac374b7c312b8f08c2322100ec
+          filename: index-db-orm_version_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json
+          label: version
+          message: v${{ steps.package-version.outputs.current-version }} +
+          color: orange
+
+      - if: ${{ github.base_ref != 'develop' }}
+        name: Create Version badage
+        uses: schneegans/dynamic-badges-action@v1.0.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: 0be9f6ac374b7c312b8f08c2322100ec
+          filename: index-db-orm_version_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json
+          label: version
+          message: v${{ steps.package-version.outputs.current-version }}
+          color: green
+
+      - name: Create CI Passing badage
+        uses: schneegans/dynamic-badges-action@v1.0.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: 0be9f6ac374b7c312b8f08c2322100ec
+          filename: index-db-orm_ci_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json
+          label: ci
+          message: passing
+          color: green
+          namedLogo: github
+
+      - name: Readme Test Change ReadMe Action
+        env:
+          BADAGE_NPM: "https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AminAdinehAhari/0be9f6ac374b7c312b8f08c2322100ec/raw/index-db-orm_npm_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json"
+          LINK_NPM: "https://www.npmjs.com/package/index-db-orm/v/${{ steps.package-version.outputs.current-version }}"
+          BADAGE_CI_PASSING: "https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AminAdinehAhari/0be9f6ac374b7c312b8f08c2322100ec/raw/index-db-orm_ci_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json"
+          BADAGE_VERSION: "https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AminAdinehAhari/0be9f6ac374b7c312b8f08c2322100ec/raw/index-db-orm_version_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json"
+          BADAGE_BUILD: "https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AminAdinehAhari/0be9f6ac374b7c312b8f08c2322100ec/raw/index-db-orm_build_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json"
+          BADAGE_DEVELOP_BUILD: "https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AminAdinehAhari/0be9f6ac374b7c312b8f08c2322100ec/raw/index-db-orm_develop_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json"
+          BADAGE_TEST: "https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AminAdinehAhari/0be9f6ac374b7c312b8f08c2322100ec/raw/index-db-orm_test_coverage_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json"
+          BEGIN_TAG: "<!-- BEGIN LATEST BADGE -->"
+          END_TAG: "<!-- END LATEST BADGE -->"
+        run: |
+          UPDATE=$(cat README.md | perl -0777 -pe 's#(${{ env.BEGIN_TAG }})(?:.|\n)*?(${{ env.END_TAG }})#${1}\n[![npm](${{ env.BADAGE_NPM }})](${{ env.BADAGE_NPM }}) [![code coverage](${{ env.BADAGE_TEST }})](${{ env.BADAGE_TEST }}) [![build status](${{ env.BADAGE_CI_PASSING }})](${{ env.BADAGE_CI_PASSING }}) [![version](${{ env.BADAGE_VERSION }})](${{ env.BADAGE_VERSION }}) [![product build](${{ env.BADAGE_BUILD }})](${{ env.BADAGE_BUILD }}) [![develop build](${{ env.BADAGE_DEVELOP_BUILD }})](${{ env.BADAGE_DEVELOP_BUILD }})\n${2}#g')
+          echo "${UPDATE}" > README.md
+
+      - uses: EndBug/add-and-commit@v7
+        with:
+          message: "update readme badages"
+          default_author: github_actions
+          branch: ${{ github.base_ref }}
+
+      - name: Publish package on NPM 📦
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - if: ${{ github.base_ref != 'develop' }}
+        uses: EndBug/add-and-commit@v7
+        with:
+          message: "publish package"
+          default_author: github_actions
+          branch: ${{ github.base_ref }}
+
+
+
