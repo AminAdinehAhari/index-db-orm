@@ -427,3 +427,13 @@ orm.onRebuildDB("dataBaseName", function () {
 | `orm.<dbName>.<storeName>`.`unbindAllInsert()` | `orm.unbindAllInsert(dbName,storeName)` |
 | `orm.<dbName>.<storeName>`.`unbindAllUpdate()` | `orm.unbindAllUpdate(dbName,storeName)` |
 | `orm.<dbName>.<storeName>`.`unbindAllDelete()` | `orm.unbindAllDelete(dbName,storeName)` |
+
+## Promises
+
+index-db-orm depends on a native ES6 Promise implementation to be [supported](https://caniuse.com/promises).
+If your environment doesn't support ES6 Promises, you can [polyfill](https://github.com/jakearchibald/es6-promise).
+
+
+## License
+
+[MIT](LICENSE)
