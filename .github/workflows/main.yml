@@ -152,34 +152,34 @@ jobs:
           namedLogo: github
 
       - name: Create License badage
-          uses: schneegans/dynamic-badges-action@v1.0.0
-          with:
-            auth: ${{ secrets.GIST_SECRET }}
-            gistID: 0be9f6ac374b7c312b8f08c2322100ec
-            filename: index-db-orm_license_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json
-            label: license
-            message: MIT
-            color: green
+        uses: schneegans/dynamic-badges-action@v1.0.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: 0be9f6ac374b7c312b8f08c2322100ec
+          filename: index-db-orm_license_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json
+          label: license
+          message: MIT
+          color: green
 
       - name: Create Download badage
-          uses: schneegans/dynamic-badges-action@v1.0.0
-          with:
-            auth: ${{ secrets.GIST_SECRET }}
-            gistID: 0be9f6ac374b7c312b8f08c2322100ec
-            filename: index-db-orm_download_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json
-            label: download
-            message: indexDbOrm.js
-            color: blue
+        uses: schneegans/dynamic-badges-action@v1.0.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: 0be9f6ac374b7c312b8f08c2322100ec
+          filename: index-db-orm_download_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json
+          label: download
+          message: indexDbOrm.js
+          color: blue
 
       - name: Create Download min badage
-          uses: schneegans/dynamic-badges-action@v1.0.0
-          with:
-            auth: ${{ secrets.GIST_SECRET }}
-            gistID: 0be9f6ac374b7c312b8f08c2322100ec
-            filename: index-db-orm_download_min_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json
-            label: download
-            message: indexDbOrm.min.js
-            color: blue
+        uses: schneegans/dynamic-badges-action@v1.0.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: 0be9f6ac374b7c312b8f08c2322100ec
+          filename: index-db-orm_download_min_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json
+          label: download
+          message: indexDbOrm.min.js
+          color: blue
 
       - name: Readme Test Change ReadMe Action
         env:
