@@ -192,9 +192,9 @@ jobs:
           BADAGE_LICENSE: "https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AminAdinehAhari/0be9f6ac374b7c312b8f08c2322100ec/raw/index-db-orm_license_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json"
           BADAGE_TEST: "https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AminAdinehAhari/0be9f6ac374b7c312b8f08c2322100ec/raw/index-db-orm_test_coverage_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json"
           BADAGE_DOWNLOAD: "https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AminAdinehAhari/0be9f6ac374b7c312b8f08c2322100ec/raw/index-db-orm_download_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json"
-          LINK_DOWNLOAD:  "https://unpkg.com/index-db-orm'@'v${{ steps.package-version.outputs.current-version }}/dist/indexDbOrm.js"
+          LINK_DOWNLOAD:  "https://unpkg.com/index-db-orm'@v${{ steps.package-version.outputs.current-version }}/dist/indexDbOrm.js"
           BADAGE_MIN_DOWNLOAD: "https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AminAdinehAhari/0be9f6ac374b7c312b8f08c2322100ec/raw/index-db-orm_download_min_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json"
-          LINK_MIN_DOWNLOAD: "https://unpkg.com/index-db-orm`@`v${{ steps.package-version.outputs.current-version }}/dist/indexDbOrm.min.js"
+          LINK_MIN_DOWNLOAD: "https://unpkg.com/index-db-orm`@v${{ steps.package-version.outputs.current-version }}/dist/indexDbOrm.min.js"
           BEGIN_TAG: "<!-- BEGIN LATEST BADGE -->"
           END_TAG: "<!-- END LATEST BADGE -->"
         run: |
