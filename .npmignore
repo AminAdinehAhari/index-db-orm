@@ -3,6 +3,7 @@
 coverage/
 node_modules/
 test/
+examples/
 webpack.*.js
 jest.*.js
 .git/
