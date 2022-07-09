@@ -200,7 +200,7 @@ jobs:
         run: |
           UPDATE=$(cat README.md | perl -0777 -pe 's#(${{ env.BEGIN_TAG }})(?:.|\n)*?(${{ env.END_TAG }})#${1}\n[![npm](${{ env.BADAGE_NPM }})](${{ env.LINK_NPM }}) [![download](${{ env.BADAGE_DOWNLOAD }})](${{ env.LINK_DOWNLOAD }}) [![download compress](${{ env.BADAGE_MIN_DOWNLOAD }})](${{ env.LINK_MIN_DOWNLOAD }}) [![code coverage](${{ env.BADAGE_TEST }})](${{ env.BADAGE_TEST }}) [![build status](${{ env.BADAGE_CI_PASSING }})](${{ env.BADAGE_CI_PASSING }}) [![version](${{ env.BADAGE_VERSION }})](${{ env.BADAGE_VERSION }}) [![product build](${{ env.BADAGE_BUILD }})](${{ env.BADAGE_BUILD }}) [![develop build](${{ env.BADAGE_DEVELOP_BUILD }})](${{ env.BADAGE_DEVELOP_BUILD }}) [![license](${{ env.BADAGE_LICENSE }})](${{ env.BADAGE_LICENSE }})\n${2}#g')
           echo "${UPDATE}" > README.md
-          UPDATE=$(cat README.md | perl -0777 -pe 's#__a__#${1}@${2}#g')
+          UPDATE=$(cat README.md | perl -0777 -pe 's#__a__#@#g')
           echo "${UPDATE}" > README.md
 
 
