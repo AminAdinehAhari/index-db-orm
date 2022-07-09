@@ -192,14 +192,18 @@ jobs:
           BADAGE_LICENSE: "https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AminAdinehAhari/0be9f6ac374b7c312b8f08c2322100ec/raw/index-db-orm_license_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json"
           BADAGE_TEST: "https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AminAdinehAhari/0be9f6ac374b7c312b8f08c2322100ec/raw/index-db-orm_test_coverage_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json"
           BADAGE_DOWNLOAD: "https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AminAdinehAhari/0be9f6ac374b7c312b8f08c2322100ec/raw/index-db-orm_download_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json"
-          LINK_DOWNLOAD:  "https://unpkg.com/index-db-orm@v${{ steps.package-version.outputs.current-version }}/dist/indexDbOrm.js"
+          LINK_DOWNLOAD:  "https://unpkg.com/index-db-orm__a__${{ steps.package-version.outputs.current-version }}/dist/indexDbOrm.js"
           BADAGE_MIN_DOWNLOAD: "https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/AminAdinehAhari/0be9f6ac374b7c312b8f08c2322100ec/raw/index-db-orm_download_min_badge_${{ github.base_ref }}_v${{ steps.package-version.outputs.current-version }}.json"
-          LINK_MIN_DOWNLOAD: "https://unpkg.com/index-db-ormvvvvv${{ steps.package-version.outputs.current-version }}/dist/indexDbOrm.min.js"
+          LINK_MIN_DOWNLOAD: "https://unpkg.com/index-db-orm__a__${{ steps.package-version.outputs.current-version }}/dist/indexDbOrm.min.js"
           BEGIN_TAG: "<!-- BEGIN LATEST BADGE -->"
           END_TAG: "<!-- END LATEST BADGE -->"
         run: |
           UPDATE=$(cat README.md | perl -0777 -pe 's#(${{ env.BEGIN_TAG }})(?:.|\n)*?(${{ env.END_TAG }})#${1}\n[![npm](${{ env.BADAGE_NPM }})](${{ env.LINK_NPM }}) [![download](${{ env.BADAGE_DOWNLOAD }})](${{ env.LINK_DOWNLOAD }}) [![download compress](${{ env.BADAGE_MIN_DOWNLOAD }})](${{ env.LINK_MIN_DOWNLOAD }}) [![code coverage](${{ env.BADAGE_TEST }})](${{ env.BADAGE_TEST }}) [![build status](${{ env.BADAGE_CI_PASSING }})](${{ env.BADAGE_CI_PASSING }}) [![version](${{ env.BADAGE_VERSION }})](${{ env.BADAGE_VERSION }}) [![product build](${{ env.BADAGE_BUILD }})](${{ env.BADAGE_BUILD }}) [![develop build](${{ env.BADAGE_DEVELOP_BUILD }})](${{ env.BADAGE_DEVELOP_BUILD }}) [![license](${{ env.BADAGE_LICENSE }})](${{ env.BADAGE_LICENSE }})\n${2}#g')
           echo "${UPDATE}" > README.md
+          UPDATE=$(cat README.md | perl -0777 -pe 's#__a__#@#g')
+          echo "${UPDATE}" > README.md
+
+
 
       - uses: EndBug/add-and-commit@v7
         with:
