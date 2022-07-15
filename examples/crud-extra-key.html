@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Index DB ORM Example | CRUD Example</title>
+    <link rel="stylesheet" href="./assets/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+
+</head>
+<body>
+<div class="container">
+    <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
+        <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
+            <span class="fs-4">Index DB ORM Example</span>
+        </a>
+
+        <ul class="nav nav-pills">
+            <li class="nav-item">
+                <a href="https://github.com/AminAdinehAhari" class="nav-link link-dark">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" class="navbar-nav-svg"
+                         viewBox="0 0 512 499.36" role="img"><title>GitHub</title>
+                        <path fill="currentColor" fill-rule="evenodd"
+                              d="M256 0C114.64 0 0 114.61 0 256c0 113.09 73.34 209 175.08 242.9 12.8 2.35 17.47-5.56 17.47-12.34 0-6.08-.22-22.18-.35-43.54-71.2 15.49-86.2-34.34-86.2-34.34-11.64-29.57-28.42-37.45-28.42-37.45-23.27-15.84 1.73-15.55 1.73-15.55 25.69 1.81 39.21 26.38 39.21 26.38 22.84 39.12 59.92 27.82 74.5 21.27 2.33-16.54 8.94-27.82 16.25-34.22-56.84-6.43-116.6-28.43-116.6-126.49 0-27.95 10-50.8 26.35-68.69-2.63-6.48-11.42-32.5 2.51-67.75 0 0 21.49-6.88 70.4 26.24a242.65 242.65 0 0 1 128.18 0c48.87-33.13 70.33-26.24 70.33-26.24 14 35.25 5.18 61.27 2.55 67.75 16.41 17.9 26.31 40.75 26.31 68.69 0 98.35-59.85 120-116.88 126.32 9.19 7.9 17.38 23.53 17.38 47.41 0 34.22-.31 61.83-.31 70.23 0 6.85 4.61 14.81 17.6 12.31C438.72 464.97 512 369.08 512 256.02 512 114.62 397.37 0 256 0z"/>
+                    </svg>
+                </a>
+            </li>
+        </ul>
+    </header>
+
+    <div class="row">
+        <div class="col-3">
+            <div class="list-group">
+                <a href="./index.html" class="list-group-item list-group-item-action" aria-current="false">
+                    DataBase
+                </a>
+                <a href="./store.html" class="list-group-item list-group-item-action" aria-current="false">
+                    Store
+                </a>
+                <a href="./crud.html" class="list-group-item list-group-item-action" aria-current="false">
+                    CRUD
+                </a>
+                <a href="./crud-extra-key.html" class="list-group-item list-group-item-action active" aria-current="true">
+                    CRUD with extra key
+                </a>
+                <a href="./pagination.html" class="list-group-item list-group-item-action" aria-current="false">
+                    Pagination
+                </a>
+                <a href="./where.html" class="list-group-item list-group-item-action" aria-current="false">
+                    Where
+                </a>
+            </div>
+        </div>
+        <div class="col-9">
+            <div class="row border-bottom mb-1 pb-2">
+                <div class="col">
+                    <button type="button" class="btn btn-primary" id="btn--insert-data-store">
+                        Insert Modal Form
+                    </button>
+                </div>
+            </div>
+            <div class="row border-bottom mb-3">
+                <div class="col">
+                    <table id="exm-table" class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th scope="col">__pk</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Family</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Phone Number</th>
+                            <th scope="col">Action</th>
+                        </tr>
+                        </thead>
+                        <tbody class="table-group-divider">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+            <div class="modal fade" id="insertModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Insert Form:</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form class="row" id="insert-form-box">
+                                <div class="col">
+                                    <div class="mb-3 row">
+                                        <label for="insert-form-name" class="col-sm-3 col-form-label">id:</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" id="insert-form-id">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 row">
+                                        <label for="insert-form-name" class="col-sm-3 col-form-label">Name:</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" id="insert-form-name">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 row">
+                                        <label for="insert-form-family" class="col-sm-3 col-form-label">Family:</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" id="insert-form-family">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 row">
+                                        <label for="insert-form-email" class="col-sm-3 col-form-label">Email: <small style="color: red;">(unique)</small></label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" id="insert-form-email">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 row">
+                                        <label for="insert-form-phone" class="col-sm-3 col-form-label">Phone Number:</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" id="insert-form-phone">
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" id="insert-form-submit" >Save changes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="updateModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Update Form:</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form class="row" id="update-form-box">
+                                <div class="col">
+                                    <div class="mb-3 row">
+                                        <label for="update-form-name" class="col-sm-3 col-form-label">Name:</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" id="update-form-name">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 row">
+                                        <label for="update-form-family" class="col-sm-3 col-form-label">Family:</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" id="update-form-family">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 row">
+                                        <label for="update-form-email" class="col-sm-3 col-form-label">Email: <small style="color: red;">(unique)</small></label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" id="update-form-email">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 row">
+                                        <label for="update-form-phone" class="col-sm-3 col-form-label">Phone Number:</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" id="update-form-phone">
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" id="update-form-submit" >Save changes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2"
+        crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://unpkg.com/index-db-orm@0.1.3/dist/indexDbOrm.min.js"></script>
+<script>
+    var orm = new window.indexDbOrm.default();
+    var DB_NAME = 'exa_crud_2';
+    var schema = [
+        {
+            name: "user",
+            keyPath: 'id',
+            indexes: [
+                {name: 'name', keyPath: 'name', option: {unique: false}},
+                {name: 'family', keyPath: 'family', option: {unique: false}},
+                {name: 'email', keyPath: 'email', option: {unique: true}},
+                {name: 'fullname', keyPath: ['name', 'family'], option: {unique: false}},
+            ]
+        }
+    ];
+    var edit_obj;
+
+    init();
+
+    function getList(){
+        $("#exm-table tbody").html(`<tr><td colspan="6" class="text-center"><p class="mb-0">LOADING....</p></td></tr>`)
+        orm.exa_crud_2.user.all().then(function (res) {
+            var count = res.length;
+            if (count > 0) {
+                var html = '';
+                for (var i = 0; i < count; i++) {
+                    html += `<tr>
+                            <td>${res[i].__pk}</td>
+                            <td>${res[i].name}</td>
+                            <td>${res[i].family}</td>
+                            <td>${res[i].email}</td>
+                            <td>${res[i].phone}</td>
+                            <td>
+                                <button type="button"
+                                    class="btn btn-danger rounded-circle btn-delete-action"
+                                    data-database-pk="${res[i].__pk}" style="--bs-btn-padding-y: .125rem; --bs-btn-padding-x: .25rem; --bs-btn-font-size: .35rem;"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="white" class="bi bi-x" viewBox="0 0 16 16">
+                                      <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                                    </svg>
+                                </button>
+                                 <button type="button"
+                                    class="btn btn-primary rounded-circle btn-edit-action p-1"
+                                    data-database-pk="${res[i].__pk}" style="--bs-btn-padding-y: .125rem; --bs-btn-padding-x: .25rem; --bs-btn-font-size: .35rem;"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16">
+                                      <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+                                    </svg>
+                                </button>
+                            </td>
+                        </tr>`
+                }
+                $("#exm-table tbody").html(html)
+            } else {
+                $("#exm-table tbody").html(`<tr><td colspan="6" class="text-center"><p class="mb-0">NO DATA</p></td></tr>`)
+            }
+        }).catch(function (error) {
+            console.log(error);
+            alert(error);
+            $("#exm-table tbody").html(`<tr class="table-danger"><td colspan="6" class="text-center"><p class="mb-0 text-danger">Has Error!!!!!</p></td></tr>`)
+        })
+    }
+
+    function init() {
+        orm.addDB({
+            name: DB_NAME,
+            stores: schema
+        }).build().then(function (res) {
+            getList();
+        }).catch(function (error) {
+            console.log(error);
+            alert(error);
+        })
+    }
+
+    function insertInStore() {
+        orm.exa_crud_2.user.insert({
+            id: $("#insert-form-id").val(),
+            name: $("#insert-form-name").val(),
+            family: $("#insert-form-family").val(),
+            email: $("#insert-form-email").val(),
+            phone: $("#insert-form-phone").val(),
+        }).then(function(res){
+            alert("success insert");
+            $('#insertModal').modal('hide');
+            getList();
+        }).catch(function(error){
+            console.log(error);
+            alert(error);
+        })
+    }
+
+    function updateInStore() {
+        edit_obj.name = $("#update-form-name").val();
+        edit_obj.family = $("#update-form-family").val();
+        edit_obj.email = $("#update-form-email").val();
+        edit_obj.phone = $("#update-form-phone").val();
+
+        orm.exa_crud_2.user.update(edit_obj).then(function(res){
+            alert("success update");
+            $('#updateModal').modal('hide');
+            getList();
+        }).catch(function(error){
+            console.log(error);
+            alert(error);
+        })
+    }
+
+    $("#btn--insert-data-store").click(function () {
+        $("#insert-form-box input").val('');
+        $('#insertModal').modal('show');
+    });
+
+    $("#insert-form-submit").click(function () {
+        insertInStore();
+    });
+
+    $("#insert-form-box").submit(function (event) {
+        event.target.preventDefault();
+        insertInStore();
+    });
+
+    $("#exm-table tbody").on('click', '.btn-delete-action', function () {
+        var pk = $(this).attr("data-database-pk");
+        orm.exa_crud_2.user.delete(pk).then(function (res) {
+            getList();
+        }).catch(function (error) {
+            console.log(error)
+        });
+    });
+
+    $("#exm-table tbody").on('click', '.btn-edit-action', function () {
+        var pk = $(this).attr("data-database-pk");
+        orm.exa_crud_2.user.find(pk).then(function (res) {
+            edit_obj = res;
+            $("#update-form-name").val(res.name);
+            $("#update-form-family").val(res.family);
+            $("#update-form-email").val(res.email);
+            $("#update-form-phone").val(res.phone);
+            $('#updateModal').modal('show');
+        }).catch(function (error) {
+            console.log(error)
+        });
+    });
+
+    $("#update-form-submit").click(function () {
+        updateInStore();
+    });
+
+    $("#update-form-box").submit(function (event) {
+        event.target.preventDefault();
+        updateInStore();
+    });
+
+
+</script>
+</body>
+</html>
