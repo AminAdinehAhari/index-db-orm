@@ -134,6 +134,7 @@ class indexDbOrm {
 
         try {
             await this.IDB?.deleteDatabase(name);
+            await this._timeout(100);
         } catch (error) {
             // return error;
         }
@@ -148,6 +149,17 @@ class indexDbOrm {
     }
 
     // Private -----------------------------------
+
+
+    /**
+     * _timeout
+     * @param {number} ms
+     * @returns {Promise<unknown>}
+     * @private
+     */
+    _timeout(ms){
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
 
     /**
      * _removeDataBaseOfSchema
@@ -406,10 +418,9 @@ class indexDbOrm {
                 }
 
                 await this._createDbStore(dbName, i);
+                await this._timeout(100);
                 await this._closeDB(dbName);
-
             }
-
             this.__schema[dbName].isBuild = true;
 
             return this;
@@ -1508,7 +1519,7 @@ class indexDbOrm {
                             }
                         }
 
-                        this._addDataBaseToClass(i)
+                        this._addDataBaseToClass(i);
 
                     } catch (e) {
                     }
@@ -1517,6 +1528,7 @@ class indexDbOrm {
                 for (let i in this.__schema) {
                     this._rebuildDBEvent(i);
                 }
+
                 resolve(this);
 
             } catch (e) {
