@@ -36,6 +36,8 @@ $ yarn add index-db-orm
 
 ## Example
 
+[DEMO EXAMPLE](https://aminadinehahari.github.io/index-db-orm/)
+
 ### note: CommonJS usage
 
 ```js
@@ -394,7 +396,7 @@ orm.onRebuildDB("dataBaseName", function () {
 | `paginate`       | `{string} dbName` , `{string} storeName` , `?{number} page (= 1)` , `?{number} total (= 20)` | `promise <array>`    |  return row as paginate mode  |
 | `count`          | `{string} dbName` , `{string} storeName` , `?{object} query (= null)` | `promise <numer>`    |  return count row  |
 | `where`          | `{string} dbName` , `{string} storeName` , `{string} conditionIndex` , `{string} conditionOperator` , `{number, string, array} conditionValues` | `object{build()}`    |  return all row by condition. `conditionIndex` must be include one of store indexes name. `conditionOperator` must include one of `=` , `>` , `>=` , `<=` , `<` ,  `between` , `betweenInclude` , `like` , `%like` , `like%` , `%like%` , `match` |
-| `where().build()`| `{string} operation` | `promise <array>`  | `operation` include one of `and` , `or` |
+| `where().all()`| `{string} operation` | `promise <array>`  | `operation` include one of `and` , `or` |
 | `onInsert`       | `{string} dbName` , `{string} storeName` ,  `{function} event`  | `{string, number} eventKey`    | set event, active this event when insert data to store   |
 | `onUpdate`       | `{string} dbName` , `{string} storeName` ,  `{function} event`  | `{string, number} eventKey`    | set event, active this event when update row of store   |
 | `onDelete`       | `{string} dbName` , `{string} storeName` ,  `{function} event`  | `{string, number} eventKey`    | set event, active this event when delete row from store   |
@@ -417,7 +419,7 @@ orm.onRebuildDB("dataBaseName", function () {
 | `orm.<dbName>.<storeName>`.`count()` | `orm.count(dbName,storeName)` |
 | `orm.<dbName>.<storeName>`.`paginate(page, total)` | `orm.paginate(dbName,storeName,page, total)` |
 | `orm.<dbName>.<storeName>`.`orm.where(conditionIndex,conditionOperator,conditionValues)` | `orm.where(dbName,storeName,conditionIndex,conditionOperator,conditionValues)` |
-| `orm.<dbName>.<storeName>`.`orm.where..where...build(operation)` | `orm.where()..where()...build(operation)` |
+| `orm.<dbName>.<storeName>`.`orm.where..where...all(operation)` | `orm.where()..where()...build(operation)` |
 | `orm.<dbName>.<storeName>`.`onInsert(event)` | `orm.onInsert(dbName,storeName,event)` |
 | `orm.<dbName>.<storeName>`.`onUpdate(event)` | `orm.onUpdate(dbName,storeName,event)` |
 | `orm.<dbName>.<storeName>`.`onDelete(event)` | `orm.onDelete(dbName,storeName,event)` |
