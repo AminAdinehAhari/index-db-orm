@@ -226,7 +226,8 @@ jobs:
           default_author: github_actions
           branch: ${{ github.base_ref }}
 
-      - uses: peaceiris/actions-gh-pages@v3
+      - if: ${{ github.base_ref != 'develop' }}
+        uses: peaceiris/actions-gh-pages@v3
         name: Deploy Examples
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
