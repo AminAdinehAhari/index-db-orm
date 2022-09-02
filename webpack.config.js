@@ -6,7 +6,7 @@ const mode = process.env.NODE_ENV || 'development';
 
 
 module.exports = {
-    entry: path.resolve(__dirname, "src/index.js"),
+    entry: path.resolve(__dirname, "src/index.ts"),
     output: {
         path: path.resolve(__dirname, "dist"),
         filename: mode === 'production' ?  "indexDbOrm.min.js" : "indexDbOrm.js",
