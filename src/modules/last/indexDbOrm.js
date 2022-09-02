@@ -1116,8 +1116,7 @@ class indexDbOrm {
             }
 
             if (operator === 'or') {
-                return [...new Map(result.map(item =>
-                    [item[keyPath], item])).values()];
+                return [...new Map(result.map(item => [item[keyPath], item])).values()];
             } else {
                 return result;
             }
