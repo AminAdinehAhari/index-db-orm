@@ -15,7 +15,8 @@ module.exports = {
     },
     collectCoverage: true,
     collectCoverageFrom: [
-        '<rootDir>/src/**/*.js'
+        '<rootDir>/src/helper/*.js',
+        '<rootDir>/src/indexDbOrm.js'
     ],
     coverageThreshold: {
         global: {
